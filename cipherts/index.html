@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="en"> 
+    <head>
+        <meta charset="utf-8" />
+        <title>Crypto Workstation</title>
+        <link href='https://fonts.googleapis.com/css?family=VT323|Patrick+Hand&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="styles/covert_action.css" type="text/css" />
+    </head>
+    <body>
+    <div class="noscript">
+        This game requires javascript to be played. 
+        No external scripts will be loaded.
+        No cookies will be set. 
+        No data will be collected.
+    </div>
+    <div id="game_wrapper" class="hidden">
+        <div id="game_container">
+            <div id="sidebar">
+                <div id="cipher_dictionary">
+                    <div id="dict_header"></div>
+                    <div id="dict_content"></div>
+                    <div id="dict_footer"></div>
+                </div>
+            </div>
+            <div id="main">
+                <form action="javascript:void(0);">
+                    <div id="title_bar">
+                        <span id="title_text">
+                            CRYPTO WORKSTATION, Msg:#<span id="msg_id">454</span>,
+                            find:<input accesskey="n" size="5" name="ngram_input" />
+                            <span id="timer">00:00</span>
+                        </span>
+                    </div>
+                </form>
+                <div id="cipher_message"></div>
+            </div>
+        </div>  
+        <div id="win_dlg" class="hidden">
+            <div id="win_msg">MESSAGE DECODED</div>
+            <div id="try_another"><a href="#">TRY ANOTHER?</a></div>
+        </div>      
+    </div>
+    <div id="footer">
+        This is a recreation of the cryptography minigame in <a href="https://en.wikipedia.org/wiki/Covert_Action" title="article on Wikipedia">Sid Meier's Covert Action</a>, developed by Microprose in 1990.
+        <br />It's a great game, check it out on
+        <a href="http://www.gog.com/game/sid_meiers_covert_action" title="Covert Action on gog.com">gog.com</a>,
+        <a href="http://store.steampowered.com/app/327390/" title="Covert Action on steam">steam</a> or
+        <a href="http://retroism.com/sid-meiers-covert-action-2/" title="Covert Action on retroism">retroism.com</a>.
+        Covert Action is owned by Tommo Inc.
+    </div>
+    
+    <script type="text/javascript" src="jquery-1.11.3.js"></script>
+    <script src="out.js"></script>
+    </body>
+</html>

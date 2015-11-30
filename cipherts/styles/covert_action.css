@@ -1,0 +1,233 @@
+﻿/*beginning of _base.scss*/
+.hidden {
+  display: none; }
+
+#timer {
+  margin-left: 5%; }
+
+/*end of _base.scss*/
+/*#region variables*/
+/*#endregion variables*/
+/*#region "generic"*/
+body {
+  font-family: "VT323", monospace;
+  background-color: black;
+  color: #52ff52;
+  font-size: 1.4em;
+  padding: 0px;
+  margin: 0px; }
+
+a, a:visited {
+  color: inherit; }
+
+a:hover {
+  color: inherit; }
+
+::selection {
+  background-color: #52ff52;
+  color: black; }
+
+::-moz-selection {
+  background-color: #52ff52;
+  color: black; }
+
+.noscript {
+  width: 50%;
+  margin: 20px auto;
+  border: solid 2px #52ff52;
+  padding: 8px; }
+
+/*#endregion "generic"*/
+/*#region "game"*/
+#game_container {
+  display: table;
+  margin: auto; }
+
+#sidebar, #main {
+  vertical-align: top;
+  display: table-cell; }
+
+#main {
+  padding-left: 2px; }
+
+/*#region dictionary*/
+#cipher_dictionary {
+  border: solid 2px #00AA00;
+  border-radius: 4px;
+  display: table;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box; }
+
+#dict_header, #dict_footer {
+  width: 90%;
+  height: 10px;
+  margin: auto;
+  background-color: #00AA00; }
+
+#dict_content {
+  margin: 8px; }
+
+#cipher_dictionary div {
+  line-height: 80%; }
+
+.cipher_dict_row {
+  display: table-row; }
+
+.cipher_dict_row > div {
+  display: table-cell; }
+
+.cipher_dict_transl {
+  white-space: pre;
+  color: #52FFFF; }
+
+.cipher_dict_subst {
+  white-space: pre;
+  font-family: "Patrick Hand", "VT323", monospace;
+  font-size: 0.8em;
+  text-align: center;
+  width: 1em; }
+
+.blink {
+  animation: blink 0.25s steps(5, start) infinite;
+  -webkit-animation: blink 0.25s steps(5, start) infinite; }
+
+@keyframes blink {
+  to {
+    visibility: hidden; } }
+
+@-webkit-keyframes blink {
+  to {
+    visibility: hidden; } }
+
+/*#endregion dictionary*/
+/*#region "title_bar"*/
+#title_bar {
+  background-color: #52ff52;
+  color: black;
+  vertical-align: middle;
+  text-align: center; }
+
+span#msg_id > a {
+  color: black;
+  text-decoration: underline; }
+
+#timer {
+  color: #00AA00; }
+
+/*#endregion "title_bar"*/
+/*#region cipher*/
+#cipher_message {
+  padding: 1em; }
+
+div.cipher_msg_row {
+  margin-bottom: 8px; }
+
+div.cipher_msg_letter_row {
+  font-family: "Patrick Hand", "VT323", monospace;
+  font-size: 0.8em;
+  text-align: center;
+  vertical-align: bottom;
+  line-height: 0.8em;
+  border-collapse: separate; }
+
+div.cipher_msg_subst_row {
+  text-align: center;
+  color: #52FFFF;
+  vertical-align: top; }
+
+span.cipher_msg_subst, span.cipher_msg_letter {
+  white-space: pre;
+  display: table-cell;
+  min-width: 15px;
+  text-align: center; }
+
+.marked {
+  background-color: #ffd800;
+  color: black; }
+
+/*#endregion cipher*/
+/*#region "misc ui elements"*/
+#command_bar {
+  position: fixed;
+  background-color: #001100;
+  width: 100%;
+  padding: 2px;
+  text-align: center;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+  -o-transform: translateX(-50%); }
+
+#footer {
+  text-align: center;
+  margin: auto;
+  padding-top: 8px;
+  width: 80%;
+  color: #52ff52;
+  font-family: sans-serif;
+  font-size: 0.6em; }
+
+form {
+  display: inline;
+  margin: 0px;
+  padding: 0px; }
+
+input {
+  background-color: rgba(0, 0, 0, 0.21);
+  border: dashed thin rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  font-size: inherit;
+  font-family: "VT323", monospace;
+  color: black; }
+
+input:focus {
+  color: indianred; }
+
+.accesskey {
+  text-decoration: underline; }
+
+#win_dlg {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+  -o-transform: translateX(-50%); }
+
+#win_msg {
+  background-color: #AD00AD;
+  color: white;
+  border: 2px solid #B0AEB0;
+  padding: 4px 8px; }
+
+div#try_another {
+  font-size: 0.7em;
+  text-align: center;
+  margin: 4px auto; }
+
+div#try_another > a {
+  border-radius: 5px;
+  padding: 2px;
+  color: black;
+  background-color: #00AA00;
+  text-decoration: none; }
+
+div#try_another > a:visited {
+  color: black;
+  text-decoration: none; }
+
+div#try_another > a:hover {
+  background-color: #52ff52; }
+
+/*#endregion "misc ui elements"*/
+/*#endregion "game"*/
+

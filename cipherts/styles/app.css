@@ -1,0 +1,30 @@
+﻿body {
+  font-family: "VT323", monospace;
+  background-color: black;
+  color: #52ff52;
+  font-size: 1.4em; }
+
+#title_bar {
+  background-color: #52ff52;
+  color: black; }
+
+#timer {
+  margin-left: 40px; }
+
+.blinking {
+  animation: blinker 1s linear infinite; }
+
+@keyframes blinker {
+  0% {
+    color: #52ff52;
+    background-color: black; }
+  49% {
+    color: #52ff52;
+    background-color: black; }
+  50% {
+    color: black;
+    background-color: #52ff52; }
+  100% {
+    color: black;
+    background-color: #52ff52; } }
+

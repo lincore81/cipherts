@@ -1,0 +1,38 @@
+﻿/*beginning of _base.scss*/
+@mixin border-box {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+@mixin transform($param) {
+    transform: $param;
+    -moz-transform: $param;
+    -ms-transform: $param;
+    -webkit-transform: $param;
+    -o-transform: $param;
+}
+
+
+.hidden {
+    display: none;
+}
+
+
+#cipher_dictionary {
+
+}
+
+
+#cipher_message {
+
+}
+
+
+#timer {
+    margin-left: 5%;
+}
+
+
+
+/*end of _base.scss*/
