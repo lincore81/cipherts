@@ -1,6 +1,6 @@
 ﻿[
   {
     "inputFile": "styles/covert_action.scss",
-    "outputFile": "styles/covert_action.css"
+    "outputFile": "www/styles/covert_action.css"
   }
 ]

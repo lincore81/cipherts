@@ -22,13 +22,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="styles\app.css">
-      <DependentUpon>_base.scss</DependentUpon>
-    </Content>
-    <Content Include="styles\app.min.css">
-      <DependentUpon>app.css</DependentUpon>
-    </Content>
-    <Content Include="index.html" />
+    <Content Include="www\index.html" />
     <Content Include="styles\covert_action.css">
       <DependentUpon>covert_action.scss</DependentUpon>
     </Content>
@@ -36,6 +30,10 @@
       <DependentUpon>covert_action.css</DependentUpon>
     </Content>
     <Content Include="web.config" />
+    <Content Include="www\styles\covert_action.css" />
+    <Content Include="www\styles\covert_action.min.css">
+      <DependentUpon>covert_action.css</DependentUpon>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="composer.ts" />
@@ -105,7 +103,7 @@
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptModuleKind>None</TypeScriptModuleKind>
-    <TypeScriptOutFile>out.js</TypeScriptOutFile>
+    <TypeScriptOutFile>www/out.js</TypeScriptOutFile>
     <TypeScriptOutDir>
     </TypeScriptOutDir>
     <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>

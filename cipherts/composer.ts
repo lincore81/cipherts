@@ -1,6 +1,6 @@
 ﻿/// <reference path="definitions.ts" />
 /// <reference path="util/random.ts" />
-module cryptogame {
+module cryptogame { 
     export class MessageComposer {
         random: lincore.Random;
         query: (variable: string, key?: string | number) => string;

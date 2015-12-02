@@ -1,4 +1,4 @@
-/// <reference path="jquery.d.ts" />
+/// <reference path="../jquery.d.ts" />
 interface Dict<T> {
     [index: string]: T;
 }
