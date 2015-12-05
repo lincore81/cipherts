@@ -22,7 +22,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="www\index.html" />
+    <Content Include="dist\index.html" />
     <Content Include="styles\covert_action.css">
       <DependentUpon>covert_action.scss</DependentUpon>
     </Content>
@@ -30,10 +30,12 @@
       <DependentUpon>covert_action.css</DependentUpon>
     </Content>
     <Content Include="web.config" />
-    <Content Include="www\styles\covert_action.css" />
-    <Content Include="www\styles\covert_action.min.css">
+    <Content Include="dist\LICENSE_JQuery.txt" />
+    <Content Include="dist\styles\covert_action.css" />
+    <Content Include="dist\styles\covert_action.min.css">
       <DependentUpon>covert_action.css</DependentUpon>
     </Content>
+    <Content Include="dist\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="composer.ts" />
@@ -103,7 +105,7 @@
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptModuleKind>None</TypeScriptModuleKind>
-    <TypeScriptOutFile>www/out.js</TypeScriptOutFile>
+    <TypeScriptOutFile>dist/out.js</TypeScriptOutFile>
     <TypeScriptOutDir>
     </TypeScriptOutDir>
     <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
