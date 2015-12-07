@@ -43,44 +43,6 @@ declare module lincore {
     }
 }
 declare module cryptogame {
-    class MessageComposer {
-        random: lincore.Random;
-        query: (variable: string, key?: string | number) => string;
-        message: string;
-        private variableRegex;
-        constructor(random?: lincore.Random);
-        getHash(): number;
-        private makeReplacerFunc();
-        compose(database: GameDatabase, templateName?: string, theatre?: string): string;
-    }
-}
-declare module lincore {
-    class Parameters {
-        dict: Dict<string>;
-        constructor(dict: Dict<string> | string);
-        remove(key: string): boolean;
-        has(key: string): boolean;
-        set(key: string, value: string): void;
-        get(key: string, def?: string): string;
-        getInt(key: string, def?: number): number;
-        getFloat(key: string, def?: number): number;
-        private fromSearchString(str);
-        toSearchString(...exceptions: string[]): string;
-    }
-}
-declare module lincore {
-    function createSetOf(arry: any[]): any;
-    function getInvertedKvs(obj: {}): {};
-    function flatcopy(obj: {}): {};
-    function parseSearchString(str: string): Dict<string>;
-    function getUrlPart(str: string): string;
-    function strRepeat(str: string, times: number): string;
-    function padLeft(str: string, len: number, padding?: string): string;
-    function padRight(str: string, len: number, padding?: string): string;
-    function getNextNode(node: any): any;
-    function getNodesInRange(range: Range): any[];
-}
-declare module cryptogame {
     class SimpleCipher {
         dictionary: Dict<string>;
         alphabet: Alphabet;
@@ -100,7 +62,45 @@ declare module cryptogame {
         private getNextLetter(msg, index);
     }
 }
+declare module cryptogame {
+    class MessageComposer {
+        random: lincore.Random;
+        query: (variable: string, key?: string | number) => string;
+        message: string;
+        private variableRegex;
+        constructor(random?: lincore.Random);
+        getHash(): number;
+        private makeReplacerFunc();
+        compose(database: GameDatabase, templateName?: string, theatre?: string): string;
+    }
+}
 declare var covertActionData: cryptogame.GameDatabase;
+declare module lincore {
+    class Parameters {
+        dict: Dict<string>;
+        constructor(dict: Dict<string> | string);
+        remove(key: string): boolean;
+        has(key: string): boolean;
+        set(key: string, value: string): void;
+        get(key: string, def?: string): string;
+        getInt(key: string, def?: number): number;
+        getFloat(key: string, def?: number): number;
+        private fromSearchString(str);
+        toSearchString(...exceptions: string[]): string;
+    }
+}
+declare module lincore {
+    function Set(arry: any[]): any;
+    function getInvertedKvs(obj: {}): {};
+    function flatcopy(obj: {}): {};
+    function parseSearchString(str: string): Dict<string>;
+    function getUrlPart(str: string): string;
+    function strRepeat(str: string, times: number): string;
+    function padLeft(str: string, len: number, padding?: string): string;
+    function padRight(str: string, len: number, padding?: string): string;
+    function getNextNode(node: any): any;
+    function getNodesInRange(range: Range): any[];
+}
 declare module cryptogame {
     class GameLogic {
         params: lincore.Parameters;
@@ -138,6 +138,8 @@ declare module cryptogame {
         timerHandle: number;
         timerElem: JQuery;
         msgIdElem: JQuery;
+        charPickerDlg: JQuery;
+        charPickerSubst: JQuery;
         timePassed: number;
         mark: boolean[];
         constructor(params: lincore.Parameters);
@@ -146,7 +148,7 @@ declare module cryptogame {
         private getTimerFunc();
         print(cipher: SimpleCipher, translation: Dict<string>): void;
         showWinState(): void;
-        newGame(seed: number, msgLength: number): void;
+        newGame(seed: number, msgLength: number, substs: string[]): void;
     }
     class HtmlPrinter {
         cipher: SimpleCipher;
@@ -166,11 +168,16 @@ declare module cryptogame {
         private printSubstRow(msg, playerSubsts, offset, output);
     }
 }
+declare module lincore {
+    var specialKeys: Dict<boolean>;
+    function isSpecialKey(event: any): boolean;
+}
 declare var game: cryptogame.GameController;
 declare module cryptogame {
     class GameController {
         logic: GameLogic;
         view: GameView;
+        pickerDlg: SubstitutionPickerDlg;
         params: lincore.Parameters;
         datasets: Dict<GameDatabase>;
         difficulties: ({} | {
@@ -182,15 +189,33 @@ declare module cryptogame {
             stripWhitespace: boolean;
         })[];
         ngramInput: JQuery;
+        ngramClear: JQuery;
         ngramFilter: string;
         enteredSubst: string;
         constructor();
         init(): void;
         win(): void;
         private addTranslation(subst, transl);
-        private onLetterSelect(letter);
+        private onLetterTyped(letter);
+        private static onSubstClick(event);
         setFilter(filter: string): void;
         private setupHooks();
         play(): void;
+    }
+}
+declare module cryptogame {
+    class SubstitutionPickerDlg {
+        pickerDlgModal: JQuery;
+        pickerDlgLetters: JQuery;
+        pickerDlgSubst: JQuery;
+        pickCallback: (subst: string, transl: string) => void;
+        private visible;
+        private currentSubst;
+        isVisible(): boolean;
+        init(): void;
+        private static clickHandler(event);
+        populate(letters: string[], pickCallback: (subst: string, transl: string) => void): void;
+        show(subst: string): void;
+        hide(): void;
     }
 }

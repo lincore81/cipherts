@@ -30,12 +30,10 @@
       <DependentUpon>covert_action.css</DependentUpon>
     </Content>
     <Content Include="web.config" />
-    <Content Include="dist\LICENSE_JQuery.txt" />
     <Content Include="dist\styles\covert_action.css" />
     <Content Include="dist\styles\covert_action.min.css">
       <DependentUpon>covert_action.css</DependentUpon>
     </Content>
-    <Content Include="dist\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="composer.ts" />
@@ -46,6 +44,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="cipher_simple.ts" />
     <TypeScriptCompile Include="data\covert_data.ts" />
+    <TypeScriptCompile Include="SubstitutionPicker.ts" />
+    <TypeScriptCompile Include="util\keys.ts" />
     <TypeScriptCompile Include="util\param.ts" />
     <TypeScriptCompile Include="util\random.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

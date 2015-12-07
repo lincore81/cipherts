@@ -1,7 +1,7 @@
 ﻿module lincore {
     var searchRegex = /\??(\w+)=(\w+)(?:\&)?/g;
 
-    export function createSetOf(arry: any[]): any {
+    export function Set(arry: any[]): any {
         var ans = {}
         for (var i = 0; i < arry.length; i++) {
             ans[arry[i]] = true;

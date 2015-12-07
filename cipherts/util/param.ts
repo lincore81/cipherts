@@ -51,7 +51,7 @@
         }
 
         toSearchString(...exceptions: string[]): string {
-            var exset = lincore.createSetOf(exceptions);
+            var exset = lincore.Set(exceptions);
             var keys = Object.keys(this.dict);
             var len = keys.length;
             var pairs = [];

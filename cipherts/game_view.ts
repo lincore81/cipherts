@@ -9,6 +9,8 @@
         timerHandle: number;
         timerElem: JQuery;
         msgIdElem: JQuery;
+        charPickerDlg: JQuery;
+        charPickerSubst: JQuery;
         timePassed: number;
         mark: boolean[];
 
@@ -26,9 +28,10 @@
             this.msgIdElem = $("span#msg_id");
             this.tryAnotherElem = $("#try_another");
             this.winDlgElem = $("#win_dlg");
+            this.charPickerDlg = $("char_picker");
+            this.charPickerSubst = $("#char_picker_subst");
         }
         
-
         setMark(m: boolean[], cipher: SimpleCipher, translation: Dict<string>) {
             this.mark = m;
             this.print(cipher, translation);
@@ -57,13 +60,12 @@
             this.winDlgElem.removeClass("hidden");
         }
 
-        newGame(seed: number, msgLength: number) {
-            this.timePassed = 0;            
+        newGame(seed: number, msgLength: number, substs: string[]) {
+            this.timePassed = 0;
             this.timerHandle = setInterval(this.getTimerFunc(), 1000);
             this.winDlgElem.addClass("hidden");
             var p = new lincore.Parameters(<Dict<string>>lincore.flatcopy(this.params.dict));
             p.dict["seed"] = "" + seed;
-            console.log(p);
             var url = lincore.getUrlPart(window.location.href);
             this.msgIdElem.html(
                 `<a href="${url}/${p.toSearchString() }" title="link to this cipher">${seed}</a>,
@@ -95,7 +97,7 @@
                 output.push(
                     `<div class="cipher_dict_row">
                         <div class="cipher_dict_transl">${s1}</div>
-                        <div class="cipher_dict_subst">${s2}</div>
+                        <div class="cipher_dict_subst" data-letter=${s2}>${s2}</div>
                         <div class="cipher_dict_count">${count}</div>
                     </div>`);
             }
@@ -121,7 +123,7 @@
         private printCipherLetter(letter: string, index: number, output: string[]) {
             var clazz = HTML.CIPHER_MSG_LETTER;
             var dataAttrib = "";
-            if (letter !== " " || this.cipher.alphabet.punctuation.indexOf(letter) != -1) {
+            if (letter !== " " && this.cipher.alphabet.punctuation.indexOf(letter) === -1) {
                 clazz += " in_alphabet";
                 dataAttrib = `data-letter="${letter}"`;
             }

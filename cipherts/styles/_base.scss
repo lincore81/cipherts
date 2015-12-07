@@ -13,9 +13,16 @@
     -o-transform: $param;
 }
 
+.in_alphabet {
+    cursor: pointer;
+}
 
 .hidden {
     display: none;
+}
+
+.invisible {
+    visibility: hidden;
 }
 
 
@@ -28,6 +35,9 @@
 
 }
 
+#char_picker_close, .char_picker_letter, .in_alphabet, .cipher_dict_subst {
+    cursor: pointer;
+}
 
 #timer {
     margin-left: 5%;

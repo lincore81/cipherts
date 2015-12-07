@@ -22,7 +22,7 @@ module cryptogame {
                 throw "Invalid alphabet, must have an equal amount of letters and substitutes: " + alphabet;
             }
             this.alphabet = alphabet;
-            this.substituteSet = lincore.createSetOf(alphabet.substitutes);
+            this.substituteSet = lincore.Set(alphabet.substitutes);
             this.random = random || new lincore.Random();
             this.options = options || {};
             this.randomizeSubstitutes();
