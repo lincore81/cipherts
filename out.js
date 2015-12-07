@@ -61,233 +61,6 @@ var lincore;
     })();
     lincore.Random = Random;
 })(lincore || (lincore = {}));
-/// <reference path="definitions.ts" />
-/// <reference path="util/random.ts" />
-var cryptogame;
-(function (cryptogame) {
-    var MessageComposer = (function () {
-        function MessageComposer(random) {
-            this.variableRegex = /\$(\w+)(?:(?:\:(\w+))|(?:\#(\d+)))?/g;
-            this.random = random || new lincore.Random();
-        }
-        MessageComposer.prototype.getHash = function () {
-            var i, chr, len;
-            var hash = 0;
-            if (this.message.length == 0)
-                return hash;
-            for (i = 0, len = this.message.length; i < len; i++) {
-                chr = this.message.charCodeAt(i);
-                hash = ((hash << 5) - hash) + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-            return hash;
-        };
-        MessageComposer.prototype.makeReplacerFunc = function () {
-            var query = this.query;
-            return function (substring, variable, keystr, keynum) {
-                var key = undefined;
-                if (keystr !== undefined || keynum !== undefined) {
-                    if (keystr !== undefined) {
-                        key = keystr;
-                    }
-                    else if (keynum !== undefined) {
-                        key = parseInt(keynum);
-                        if (key === NaN)
-                            throw "key is NaN: " + keynum;
-                    }
-                }
-                return query(variable, key);
-            };
-        };
-        MessageComposer.prototype.compose = function (database, templateName, theatre) {
-            templateName = templateName || this.random.pick1(Object.keys(database.templates));
-            var template = database.templates[templateName];
-            template = this.random.pick(template, template.length);
-            var ans = [];
-            for (var i in template) {
-                var t = template[i];
-                ans.push(this.random.pick1(database.components[t]));
-            }
-            this.query = database.makeQueryFunc(theatre, this.random);
-            var msg = ans.join(" ").replace(this.variableRegex, this.makeReplacerFunc());
-            this.message = msg;
-            return msg;
-        };
-        return MessageComposer;
-    })();
-    cryptogame.MessageComposer = MessageComposer;
-})(cryptogame || (cryptogame = {}));
-var lincore;
-(function (lincore) {
-    var Parameters = (function () {
-        function Parameters(dict) {
-            if (typeof dict === "string") {
-                this.fromSearchString(dict);
-            }
-            else {
-                this.dict = dict || {};
-            }
-        }
-        Parameters.prototype.remove = function (key) {
-            if (this.dict.hasOwnProperty(key)) {
-                delete this.dict[key];
-                return true;
-            }
-            else {
-                return false;
-            }
-        };
-        Parameters.prototype.has = function (key) {
-            return this.dict.hasOwnProperty(key);
-        };
-        Parameters.prototype.set = function (key, value) {
-            this.dict[key] = value;
-        };
-        Parameters.prototype.get = function (key, def) {
-            return this.dict[key] || def;
-        };
-        Parameters.prototype.getInt = function (key, def) {
-            var num = parseInt(this.dict[key]);
-            return num !== NaN ? num : def;
-        };
-        Parameters.prototype.getFloat = function (key, def) {
-            var num = parseFloat(this.dict[key]);
-            return num !== NaN ? num : def;
-        };
-        Parameters.prototype.fromSearchString = function (str) {
-            var _this = this;
-            //format: "?key1=value1&key2=value2&...&keyN=valueN"
-            var searchRegex = /\??(\w+)=(\w+)(?:\&)?/g;
-            this.dict = {};
-            str.replace(searchRegex, function (match, key, value) {
-                _this.dict[key] = value;
-                return match;
-            });
-        };
-        Parameters.prototype.toSearchString = function () {
-            var exceptions = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                exceptions[_i - 0] = arguments[_i];
-            }
-            var exset = lincore.createSetOf(exceptions);
-            var keys = Object.keys(this.dict);
-            var len = keys.length;
-            var pairs = [];
-            for (var i = 0; i < len; i++) {
-                var key = keys[i];
-                if (!exset.hasOwnProperty(key)) {
-                    pairs.push(key + "=" + this.dict[key]);
-                }
-            }
-            return "?" + pairs.join("&");
-        };
-        return Parameters;
-    })();
-    lincore.Parameters = Parameters;
-})(lincore || (lincore = {}));
-var lincore;
-(function (lincore) {
-    var searchRegex = /\??(\w+)=(\w+)(?:\&)?/g;
-    function createSetOf(arry) {
-        var ans = {};
-        for (var i = 0; i < arry.length; i++) {
-            ans[arry[i]] = true;
-        }
-        return ans;
-    }
-    lincore.createSetOf = createSetOf;
-    function getInvertedKvs(obj) {
-        var keys = Object.keys(obj);
-        var ans = {};
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            ans[obj[key]] = key;
-        }
-        return ans;
-    }
-    lincore.getInvertedKvs = getInvertedKvs;
-    function flatcopy(obj) {
-        if (null == obj || "object" != typeof obj)
-            return obj;
-        var copy = obj.constructor();
-        for (var attr in obj) {
-            if (obj.hasOwnProperty(attr))
-                copy[attr] = obj[attr];
-        }
-        return copy;
-    }
-    lincore.flatcopy = flatcopy;
-    function parseSearchString(str) {
-        //format: "?key1=value1&key2=value2&...&keyN=valueN"
-        var dict = {};
-        str.replace(searchRegex, function (match, key, value) {
-            dict[key] = value;
-            return match;
-        });
-        return dict;
-    }
-    lincore.parseSearchString = parseSearchString;
-    function getUrlPart(str) {
-        str = str.replace(searchRegex, "");
-        if (str.charAt(str.length - 1) == "/")
-            str = str.substring(0, str.length - 1);
-        return str;
-    }
-    lincore.getUrlPart = getUrlPart;
-    function strRepeat(str, times) {
-        return Array(times + 1).join(str);
-    }
-    lincore.strRepeat = strRepeat;
-    function padLeft(str, len, padding) {
-        if (padding === void 0) { padding = " "; }
-        var plen = len - str.length;
-        if (plen <= 0)
-            return str;
-        return strRepeat(padding, plen) + str;
-    }
-    lincore.padLeft = padLeft;
-    function padRight(str, len, padding) {
-        if (padding === void 0) { padding = " "; }
-        var plen = len - str.length;
-        if (plen <= 0)
-            return str;
-        return str + strRepeat(padding, plen);
-    }
-    lincore.padRight = padRight;
-    function getNextNode(node) {
-        if (node.firstChild)
-            return node.firstChild;
-        while (node) {
-            if (node.nextSibling)
-                return node.nextSibling;
-            node = node.parentNode;
-        }
-    }
-    lincore.getNextNode = getNextNode;
-    // http://stackoverflow.com/questions/667951/how-to-get-nodes-lying-inside-a-range-with-javascript
-    function getNodesInRange(range) {
-        var start = range.startContainer;
-        var end = range.endContainer;
-        var commonAncestor = range.commonAncestorContainer;
-        var nodes = [];
-        var node;
-        // walk parent nodes from start to common ancestor
-        for (node = start.parentNode; node; node = node.parentNode) {
-            nodes.push(node);
-            if (node == commonAncestor)
-                break;
-        }
-        nodes.reverse();
-        // walk children and siblings from start until end is found
-        for (node = start; node; node = getNextNode(node)) {
-            nodes.push(node);
-            if (node == end)
-                break;
-        }
-        return nodes;
-    }
-    lincore.getNodesInRange = getNodesInRange;
-})(lincore || (lincore = {}));
 /// <reference path="definitions.ts"/>
 /// <reference path="util/random.ts"/>
 var cryptogame;
@@ -301,7 +74,7 @@ var cryptogame;
                 throw "Invalid alphabet, must have an equal amount of letters and substitutes: " + alphabet;
             }
             this.alphabet = alphabet;
-            this.substituteSet = lincore.createSetOf(alphabet.substitutes);
+            this.substituteSet = lincore.Set(alphabet.substitutes);
             this.random = random || new lincore.Random();
             this.options = options || {};
             this.randomizeSubstitutes();
@@ -417,6 +190,62 @@ var cryptogame;
         return SimpleCipher;
     })();
     cryptogame.SimpleCipher = SimpleCipher;
+})(cryptogame || (cryptogame = {}));
+/// <reference path="definitions.ts" />
+/// <reference path="util/random.ts" />
+var cryptogame;
+(function (cryptogame) {
+    var MessageComposer = (function () {
+        function MessageComposer(random) {
+            this.variableRegex = /\$(\w+)(?:(?:\:(\w+))|(?:\#(\d+)))?/g;
+            this.random = random || new lincore.Random();
+        }
+        MessageComposer.prototype.getHash = function () {
+            var i, chr, len;
+            var hash = 0;
+            if (this.message.length == 0)
+                return hash;
+            for (i = 0, len = this.message.length; i < len; i++) {
+                chr = this.message.charCodeAt(i);
+                hash = ((hash << 5) - hash) + chr;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        };
+        MessageComposer.prototype.makeReplacerFunc = function () {
+            var query = this.query;
+            return function (substring, variable, keystr, keynum) {
+                var key = undefined;
+                if (keystr !== undefined || keynum !== undefined) {
+                    if (keystr !== undefined) {
+                        key = keystr;
+                    }
+                    else if (keynum !== undefined) {
+                        key = parseInt(keynum);
+                        if (key === NaN)
+                            throw "key is NaN: " + keynum;
+                    }
+                }
+                return query(variable, key);
+            };
+        };
+        MessageComposer.prototype.compose = function (database, templateName, theatre) {
+            templateName = templateName || this.random.pick1(Object.keys(database.templates));
+            var template = database.templates[templateName];
+            template = this.random.pick(template, template.length);
+            var ans = [];
+            for (var i in template) {
+                var t = template[i];
+                ans.push(this.random.pick1(database.components[t]));
+            }
+            this.query = database.makeQueryFunc(theatre, this.random);
+            var msg = ans.join(" ").replace(this.variableRegex, this.makeReplacerFunc());
+            this.message = msg;
+            return msg;
+        };
+        return MessageComposer;
+    })();
+    cryptogame.MessageComposer = MessageComposer;
 })(cryptogame || (cryptogame = {}));
 /// <reference path="../definitions.ts"/>
 var covertActionData = {
@@ -856,6 +685,177 @@ covertActionData.theatres["america"] = {
         ["Tel Aviv", "Israel"]
     ]
 };
+var lincore;
+(function (lincore) {
+    var Parameters = (function () {
+        function Parameters(dict) {
+            if (typeof dict === "string") {
+                this.fromSearchString(dict);
+            }
+            else {
+                this.dict = dict || {};
+            }
+        }
+        Parameters.prototype.remove = function (key) {
+            if (this.dict.hasOwnProperty(key)) {
+                delete this.dict[key];
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        Parameters.prototype.has = function (key) {
+            return this.dict.hasOwnProperty(key);
+        };
+        Parameters.prototype.set = function (key, value) {
+            this.dict[key] = value;
+        };
+        Parameters.prototype.get = function (key, def) {
+            return this.dict[key] || def;
+        };
+        Parameters.prototype.getInt = function (key, def) {
+            var num = parseInt(this.dict[key]);
+            return num !== NaN ? num : def;
+        };
+        Parameters.prototype.getFloat = function (key, def) {
+            var num = parseFloat(this.dict[key]);
+            return num !== NaN ? num : def;
+        };
+        Parameters.prototype.fromSearchString = function (str) {
+            var _this = this;
+            //format: "?key1=value1&key2=value2&...&keyN=valueN"
+            var searchRegex = /\??(\w+)=(\w+)(?:\&)?/g;
+            this.dict = {};
+            str.replace(searchRegex, function (match, key, value) {
+                _this.dict[key] = value;
+                return match;
+            });
+        };
+        Parameters.prototype.toSearchString = function () {
+            var exceptions = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                exceptions[_i - 0] = arguments[_i];
+            }
+            var exset = lincore.Set(exceptions);
+            var keys = Object.keys(this.dict);
+            var len = keys.length;
+            var pairs = [];
+            for (var i = 0; i < len; i++) {
+                var key = keys[i];
+                if (!exset.hasOwnProperty(key)) {
+                    pairs.push(key + "=" + this.dict[key]);
+                }
+            }
+            return "?" + pairs.join("&");
+        };
+        return Parameters;
+    })();
+    lincore.Parameters = Parameters;
+})(lincore || (lincore = {}));
+var lincore;
+(function (lincore) {
+    var searchRegex = /\??(\w+)=(\w+)(?:\&)?/g;
+    function Set(arry) {
+        var ans = {};
+        for (var i = 0; i < arry.length; i++) {
+            ans[arry[i]] = true;
+        }
+        return ans;
+    }
+    lincore.Set = Set;
+    function getInvertedKvs(obj) {
+        var keys = Object.keys(obj);
+        var ans = {};
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            ans[obj[key]] = key;
+        }
+        return ans;
+    }
+    lincore.getInvertedKvs = getInvertedKvs;
+    function flatcopy(obj) {
+        if (null == obj || "object" != typeof obj)
+            return obj;
+        var copy = obj.constructor();
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr))
+                copy[attr] = obj[attr];
+        }
+        return copy;
+    }
+    lincore.flatcopy = flatcopy;
+    function parseSearchString(str) {
+        //format: "?key1=value1&key2=value2&...&keyN=valueN"
+        var dict = {};
+        str.replace(searchRegex, function (match, key, value) {
+            dict[key] = value;
+            return match;
+        });
+        return dict;
+    }
+    lincore.parseSearchString = parseSearchString;
+    function getUrlPart(str) {
+        str = str.replace(searchRegex, "");
+        if (str.charAt(str.length - 1) == "/")
+            str = str.substring(0, str.length - 1);
+        return str;
+    }
+    lincore.getUrlPart = getUrlPart;
+    function strRepeat(str, times) {
+        return Array(times + 1).join(str);
+    }
+    lincore.strRepeat = strRepeat;
+    function padLeft(str, len, padding) {
+        if (padding === void 0) { padding = " "; }
+        var plen = len - str.length;
+        if (plen <= 0)
+            return str;
+        return strRepeat(padding, plen) + str;
+    }
+    lincore.padLeft = padLeft;
+    function padRight(str, len, padding) {
+        if (padding === void 0) { padding = " "; }
+        var plen = len - str.length;
+        if (plen <= 0)
+            return str;
+        return str + strRepeat(padding, plen);
+    }
+    lincore.padRight = padRight;
+    function getNextNode(node) {
+        if (node.firstChild)
+            return node.firstChild;
+        while (node) {
+            if (node.nextSibling)
+                return node.nextSibling;
+            node = node.parentNode;
+        }
+    }
+    lincore.getNextNode = getNextNode;
+    // http://stackoverflow.com/questions/667951/how-to-get-nodes-lying-inside-a-range-with-javascript
+    function getNodesInRange(range) {
+        var start = range.startContainer;
+        var end = range.endContainer;
+        var commonAncestor = range.commonAncestorContainer;
+        var nodes = [];
+        var node;
+        // walk parent nodes from start to common ancestor
+        for (node = start.parentNode; node; node = node.parentNode) {
+            nodes.push(node);
+            if (node == commonAncestor)
+                break;
+        }
+        nodes.reverse();
+        // walk children and siblings from start until end is found
+        for (node = start; node; node = getNextNode(node)) {
+            nodes.push(node);
+            if (node == end)
+                break;
+        }
+        return nodes;
+    }
+    lincore.getNodesInRange = getNodesInRange;
+})(lincore || (lincore = {}));
 /// <reference path="util/random.ts"/>
 /// <reference path="util/param.ts"/>
 /// <reference path="util/util.ts"/>
@@ -937,6 +937,8 @@ var cryptogame;
             this.msgIdElem = $("span#msg_id");
             this.tryAnotherElem = $("#try_another");
             this.winDlgElem = $("#win_dlg");
+            this.charPickerDlg = $("char_picker");
+            this.charPickerSubst = $("#char_picker_subst");
         };
         GameView.prototype.setMark = function (m, cipher, translation) {
             this.mark = m;
@@ -962,13 +964,12 @@ var cryptogame;
             this.tryAnotherElem.html("<a href=\"javascript:game.play();\">TRY ANOTHER?</a>");
             this.winDlgElem.removeClass("hidden");
         };
-        GameView.prototype.newGame = function (seed, msgLength) {
+        GameView.prototype.newGame = function (seed, msgLength, substs) {
             this.timePassed = 0;
             this.timerHandle = setInterval(this.getTimerFunc(), 1000);
             this.winDlgElem.addClass("hidden");
             var p = new lincore.Parameters(lincore.flatcopy(this.params.dict));
             p.dict["seed"] = "" + seed;
-            console.log(p);
             var url = lincore.getUrlPart(window.location.href);
             this.msgIdElem.html("<a href=\"" + url + "/" + p.toSearchString() + "\" title=\"link to this cipher\">" + seed + "</a>,\n                 Len:" + msgLength);
         };
@@ -991,7 +992,7 @@ var cryptogame;
                 s1 = lincore.padRight(s1, cipher.maxLetterLength);
                 var s2 = cipher.alphabet.substitutes[i];
                 var count = cipher.letterCounts[letter];
-                output.push("<div class=\"cipher_dict_row\">\n                        <div class=\"cipher_dict_transl\">" + s1 + "</div>\n                        <div class=\"cipher_dict_subst\">" + s2 + "</div>\n                        <div class=\"cipher_dict_count\">" + count + "</div>\n                    </div>");
+                output.push("<div class=\"cipher_dict_row\">\n                        <div class=\"cipher_dict_transl\">" + s1 + "</div>\n                        <div class=\"cipher_dict_subst\" data-letter=" + s2 + ">" + s2 + "</div>\n                        <div class=\"cipher_dict_count\">" + count + "</div>\n                    </div>");
             }
             return output.join("");
         };
@@ -1013,7 +1014,7 @@ var cryptogame;
         HtmlPrinter.prototype.printCipherLetter = function (letter, index, output) {
             var clazz = cryptogame.HTML.CIPHER_MSG_LETTER;
             var dataAttrib = "";
-            if (letter !== " " || this.cipher.alphabet.punctuation.indexOf(letter) != -1) {
+            if (letter !== " " && this.cipher.alphabet.punctuation.indexOf(letter) === -1) {
                 clazz += " in_alphabet";
                 dataAttrib = "data-letter=\"" + letter + "\"";
             }
@@ -1065,9 +1066,29 @@ var cryptogame;
     })();
     cryptogame.HtmlPrinter = HtmlPrinter;
 })(cryptogame || (cryptogame = {}));
+var lincore;
+(function (lincore) {
+    lincore.specialKeys = lincore.Set([
+        null, "Unidentified", "Esc", "Escape",
+        "Left", "Right", "Up", "Down", "Dead",
+        "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+        "PageDown", "PageUp", "Home", "End", "CapsLock", "Pause",
+        "Shift", "Alt", "Control", "Win", "OS", "AltGraph",
+        "F1", "F2", "F3", "F4", "F5", "F6",
+        "F7", "F8", "F9", "F10", "F11", "F12",
+        "F13", "F14", "F15", "F16", "F17", "F18",
+        "F19", "F20", "F21", "F22", "F23", "F24"
+    ]);
+    function isSpecialKey(event) {
+        var key = event.key !== undefined ? event.key : event.keyIdentifier;
+        return lincore.specialKeys[key] || event.altKey || event.ctrlKey || event.metaKey;
+    }
+    lincore.isSpecialKey = isSpecialKey;
+})(lincore || (lincore = {}));
 ///<reference path="jquery.d.ts" />
 ///<reference path="game_logic.ts" />
 ///<reference path="game_view.ts" />
+///<reference path="util/keys.ts" />
 var game;
 $(function () {
     game = new cryptogame.GameController();
@@ -1092,11 +1113,14 @@ var cryptogame;
             this.logic = new cryptogame.GameLogic(this.params, this.datasets, this.difficulties);
             this.view = new cryptogame.GameView(this.params);
             this.ngramFilter = "";
+            this.pickerDlg = new cryptogame.SubstitutionPickerDlg();
         }
         GameController.prototype.init = function () {
             this.ngramInput = $('input[name="ngram_input"]');
+            this.ngramClear = $('button[name="ngram_clear"]');
             this.view.init();
             this.setupHooks();
+            this.pickerDlg.init();
         };
         GameController.prototype.win = function () {
             this.params.remove("seed");
@@ -1115,7 +1139,7 @@ var cryptogame;
                 }
             }
         };
-        GameController.prototype.onLetterSelect = function (letter) {
+        GameController.prototype.onLetterTyped = function (letter) {
             if (this.enteredSubst) {
                 $(".cipher_dict_subst:contains(\"" + this.enteredSubst + "\")").removeClass("blink");
                 if (letter == " " || letter && this.logic.hasSubstitute(letter)) {
@@ -1128,24 +1152,40 @@ var cryptogame;
                 $(".cipher_dict_subst:contains(\"" + letter + "\")").addClass("blink");
             }
         };
+        GameController.onSubstClick = function (event) {
+            var clicked = $(event.target);
+            if (!clicked.hasClass("in_alphabet") && !clicked.hasClass("cipher_dict_subst"))
+                return;
+            var self = event.data;
+            var subst = clicked.attr("data-letter");
+            self.pickerDlg.show(subst);
+        };
         GameController.prototype.setFilter = function (filter) {
             filter = filter.toLocaleUpperCase();
             if (filter !== this.ngramFilter) {
                 this.ngramFilter = filter;
                 var mark = this.logic.cipher.filter(filter);
                 this.view.setMark(mark, this.logic.cipher, this.logic.translation);
+                if (filter !== "") {
+                    this.ngramClear.removeClass("invisible");
+                }
+                else {
+                    this.ngramClear.addClass("invisible");
+                }
             }
         };
         GameController.prototype.setupHooks = function () {
             var _this = this;
             var inst = this;
             $("html").keyup(function (event) {
+                if (lincore.isSpecialKey(event.originalEvent))
+                    return;
                 if (!$(document.activeElement).is("body"))
                     return;
                 var ch = String.fromCharCode(event.which).toUpperCase();
-                inst.onLetterSelect(ch);
+                inst.onLetterTyped(ch);
             });
-            $(this.ngramInput).bind("change paste keyup", function (event) {
+            this.ngramInput.bind("change paste keyup", function (event) {
                 if (event.which === 27) {
                     _this.ngramInput.val("");
                     _this.ngramInput.get(0).blur();
@@ -1156,15 +1196,83 @@ var cryptogame;
                 }
                 inst.setFilter(_this.ngramInput.val());
             });
+            this.ngramClear.bind("click", function (event) {
+                _this.ngramInput.val("");
+                _this.ngramInput.change();
+            });
+            $("#dict_content").click(this, GameController.onSubstClick);
+            $("#cipher_message").click(this, GameController.onSubstClick);
         };
         GameController.prototype.play = function () {
             var seed = this.logic.random.seed;
             this.logic.newGame();
-            this.view.newGame(seed, this.logic.cipher.message.length);
-            this.view.print(this.logic.cipher, this.logic.translation);
+            var cipher = this.logic.cipher;
+            var msgLength = cipher.cipher.length;
+            this.view.newGame(seed, msgLength, cipher.alphabet.letters);
+            this.view.print(cipher, this.logic.translation);
+            var self = this;
+            this.pickerDlg.populate(cipher.alphabet.letters, function (subst, transl) {
+                self.pickerDlg.hide();
+                self.addTranslation(subst, transl);
+            });
         };
         return GameController;
     })();
     cryptogame.GameController = GameController;
+})(cryptogame || (cryptogame = {}));
+var cryptogame;
+(function (cryptogame) {
+    var SubstitutionPickerDlg = (function () {
+        function SubstitutionPickerDlg() {
+        }
+        SubstitutionPickerDlg.prototype.isVisible = function () {
+            return this.visible;
+        };
+        SubstitutionPickerDlg.prototype.init = function () {
+            this.pickerDlgModal = $("#char_picker_modal_bg");
+            this.pickerDlgLetters = $("#char_picker_letters");
+            this.pickerDlgSubst = $("#char_picker_subst");
+            this.pickerDlgModal.click(this, SubstitutionPickerDlg.clickHandler);
+            this.visible = false;
+        };
+        SubstitutionPickerDlg.clickHandler = function (event) {
+            var self = event.data;
+            var target = $(event.target);
+            if (target.hasClass("char_picker_letter")) {
+                var letter = target.attr("data-letter");
+                if (self.pickCallback)
+                    self.pickCallback(self.currentSubst, letter);
+            }
+            else if (target.is("#char_picker_close") || target.is("#char_picker_modal_bg")) {
+                self.hide();
+            }
+        };
+        SubstitutionPickerDlg.prototype.populate = function (letters, pickCallback) {
+            var output = [];
+            for (var i = 0, len = letters.length; i < len; i++) {
+                var letter = letters[i];
+                output.push("<span class=\"char_picker_letter\"\n                        data-letter=\"" + letter + "\">" + letter + "</span> ");
+            }
+            output.push('<span class="char_picker_letter" data-letter=" ">Clear</span>');
+            this.pickerDlgLetters.html(output.join(""));
+            this.pickCallback = pickCallback;
+        };
+        SubstitutionPickerDlg.prototype.show = function (subst) {
+            if (!this.visible) {
+                this.pickerDlgModal.removeClass("hidden");
+                this.pickerDlgSubst.text(subst);
+                this.currentSubst = subst;
+                this.visible = true;
+            }
+        };
+        SubstitutionPickerDlg.prototype.hide = function () {
+            if (this.visible) {
+                this.pickerDlgModal.addClass("hidden");
+                this.visible = false;
+            }
+        };
+        return SubstitutionPickerDlg;
+    })();
+    cryptogame.SubstitutionPickerDlg = SubstitutionPickerDlg;
 })(cryptogame || (cryptogame = {}));
 //# sourceMappingURL=out.js.map
