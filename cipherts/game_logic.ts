@@ -74,7 +74,8 @@ module cryptogame {
         }
 
         createCipher() {
-            this.alphabet = this.db.alphabets[this.params.get("alphabet", "latin")];
+            var alphabetName = this.params.get("alphabet", this.difficulty["alphabet"] || "default");
+            this.alphabet = this.db.alphabets[alphabetName];
             this.cipher = new SimpleCipher(this.alphabet, this.difficulty);
             this.cipher.encode(this.message);
             this.cipher.countLetters();

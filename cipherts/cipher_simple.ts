@@ -35,7 +35,9 @@ module cryptogame {
             }
             for (var i = 0; i < this.cipher.length; i++) {
                 var letter = this.cipher[i];
-                this.letterCounts[letter]++;
+                if (this.letterCounts.hasOwnProperty(letter)) {
+                    this.letterCounts[letter]++;
+                }
             }
             return this.letterCounts;
         }

@@ -17,6 +17,14 @@
     cursor: pointer;
 }
 
+.row {
+    display: table-row;
+}
+
+.cell {
+    display: table-cell;
+}
+
 .hidden {
     display: none;
 }
@@ -44,5 +52,13 @@
 }
 
 
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 /*end of _base.scss*/

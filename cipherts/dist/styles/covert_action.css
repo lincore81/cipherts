@@ -2,6 +2,12 @@
 .in_alphabet {
   cursor: pointer; }
 
+.row {
+  display: table-row; }
+
+.cell {
+  display: table-cell; }
+
 .hidden {
   display: none; }
 
@@ -13,6 +19,13 @@
 
 #timer {
   margin-left: 5%; }
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
 
 /*end of _base.scss*/
 /*#region variables*/
@@ -98,7 +111,8 @@ a:hover {
   font-family: "Patrick Hand", "VT323", monospace;
   font-size: 0.8em;
   text-align: center;
-  width: 1em; }
+  width: 1em;
+  padding-right: 4px; }
 
 .blink {
   animation: blink 0.25s steps(5, start) infinite;
@@ -130,7 +144,8 @@ span#msg_id > a {
 /*#endregion "title_bar"*/
 /*#region cipher*/
 #cipher_message {
-  padding: 1em; }
+  padding: 1em;
+  display: table; }
 
 div.cipher_msg_row {
   margin-bottom: 8px; }
@@ -141,16 +156,19 @@ div.cipher_msg_letter_row {
   text-align: center;
   vertical-align: bottom;
   line-height: 0.8em;
-  border-collapse: separate; }
+  border-collapse: separate;
+  display: table-row; }
 
 div.cipher_msg_subst_row {
   text-align: center;
   color: #52FFFF;
-  vertical-align: top; }
+  vertical-align: top;
+  display: table-row; }
 
 span.cipher_msg_subst, span.cipher_msg_letter {
   white-space: pre;
   display: table-cell;
+  table-layout: fixed;
   min-width: 15px;
   text-align: center; }
 
@@ -164,28 +182,113 @@ span.cipher_msg_subst, span.cipher_msg_letter {
 
 /*#endregion cipher*/
 /*#region "misc ui elements"*/
-#command_bar {
-  position: fixed;
-  background-color: #001100;
-  width: 100%;
+#footer {
+  background-color: black;
+  color: indianred;
   padding: 2px;
+  font-size: 0.9em;
+  height: 20px;
+  width: 100%;
   text-align: center;
   bottom: 0px;
+  vertical-align: middle; }
+
+#tabcontrol {
+  position: absolute;
+  z-index: 100;
+  bottom: 0px;
+  min-width: 60%;
+  max-width: 100%;
   left: 50%;
+  background-color: black;
   transform: translateX(-50%);
   -moz-transform: translateX(-50%);
   -ms-transform: translateX(-50%);
   -webkit-transform: translateX(-50%);
   -o-transform: translateX(-50%); }
 
-#footer {
-  text-align: center;
-  margin: auto;
-  padding-top: 8px;
-  width: 80%;
-  color: #52ff52;
-  font-family: sans-serif;
-  font-size: 0.6em; }
+#footer ul {
+  list-style: none;
+  display: inline;
+  padding: 0px; }
+
+#footer li {
+  display: inline;
+  padding: 0px 8px;
+  cursor: pointer;
+  border-left: 1px indianred solid; }
+
+#footer li:first-of-type {
+  border-left: none; }
+
+#footer li:hover {
+  background-color: indianred;
+  color: black; }
+
+#footer li.selected {
+  background-color: indianred;
+  color: black; }
+
+#footer li#deselect_tab {
+  background-color: indianred;
+  color: black;
+  visibility: hidden; }
+
+#footer li#deselect_tab:hover {
+  font-weight: bold; }
+
+#footer img {
+  vertical-align: text-bottom; }
+
+div.content::-webkit-scrollbar {
+  width: 16px; }
+
+div.content::-webkit-scrollbar-track {
+  border-left: 1px solid indianred;
+  border-radius: 4px; }
+
+div.content::-webkit-scrollbar-thumb {
+  background-color: indianred;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 0 6px indianred; }
+
+.cell.setting {
+  white-space: nowrap;
+  padding-right: 16px; }
+
+div#tab_contents div.content {
+  max-height: 60%;
+  max-height: 60vh;
+  overflow-y: auto;
+  width: 100%;
+  padding: 8px;
+  color: #ccc;
+  font-size: 0.9em;
+  border: indianred 2px solid;
+  border-radius: 4px;
+  background-color: black; }
+  div#tab_contents div.content :first-child {
+    margin-top: 0px; }
+  div#tab_contents div.content :last-child {
+    margin-bottom: 0px; }
+  div#tab_contents div.content img {
+    height: 1em;
+    vertical-align: middle; }
+  div#tab_contents div.content a {
+    text-decoration: none;
+    color: indianred; }
+  div#tab_contents div.content a:hover {
+    text-decoration: underline; }
+  div#tab_contents div.content label {
+    color: indianred; }
+  div#tab_contents div.content input[type="radio"] + label {
+    cursor: pointer; }
+  div#tab_contents div.content a:visited {
+    color: indianred;
+    text-decoration: underline; }
+
+.center {
+  text-align: center; }
 
 form {
   display: inline;

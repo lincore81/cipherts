@@ -1,4 +1,7 @@
-﻿module cryptogame {
+﻿///<require path="tab_control.ts" />
+///<require path="util/domutil.ts" />
+
+module cryptogame {
     export class GameView {
         printer: HtmlPrinter;
         params: lincore.Parameters;
@@ -11,12 +14,15 @@
         msgIdElem: JQuery;
         charPickerDlg: JQuery;
         charPickerSubst: JQuery;
+        tabControl: lincore.TabControl;
         timePassed: number;
         mark: boolean[];
 
         constructor(params: lincore.Parameters) {
             this.printer = new HtmlPrinter(params.getInt("width"));
             this.params = params;
+            this.tabControl = new lincore.TabControl("li.tab",
+                "div#tab_contents div.content", undefined);
         }
 
         init() {
@@ -30,7 +36,47 @@
             this.winDlgElem = $("#win_dlg");
             this.charPickerDlg = $("char_picker");
             this.charPickerSubst = $("#char_picker_subst");
+            
+            $("#footer").removeClass("hidden");
+            var expandables = $(".expandable");
+            expandables.slideToggle(0);
+            lincore.makeAllExpandable(expandables);
+            this.tabControl.init(undefined, "mouseenter");
+            var self = this;
+            var deselect = $("li#deselect_tab");
+            deselect.click((event) => {
+                console.log("deselect!");
+                self.tabControl.deselect();
+            });
+            this.tabControl.onTabSelectCallback = (tab, content) => {
+                deselect.css("visibility", "unset");
+            };
+            this.tabControl.onTabDeselectCallback = (tab, content) => {
+                deselect.css("visibility", "hidden");
+            };
+            var tabContents = $("div#tab_contents");
+            var footer = $("div#footer");
+            $("div#tabcontrol").mouseleave((e) => { self.tabControl.deselect() });
+            //this.tabControl.onTabSelectCallback = (tab, content) => {
+            //    var tabOffset = tab.offset();
+            //    var tabWidth = tab.width();
+            //    var documentWidth = $(document).width();
+            //    var halign = (tabOffset.left + tabWidth / 2) / documentWidth;
+            //    var tabContentsOffset = { top: tabOffset.top - tab.height(), left: 0 };
+            //    console.log(halign);
+            //    if (halign < 0.334) {
+            //        tabContentsOffset.left = tabOffset.left;
+            //    } else if (halign >= 0.667) {
+            //        tabContentsOffset.left = tabOffset.left + tabWidth - tabContents.width();
+            //    } else {
+            //        tabContentsOffset.left = tabOffset.left + (tabWidth - tabContents.width()) / 2;
+            //    }
+            //    tabContents.offset(tabContentsOffset);
+            //    console.log(`tabOffset=${lincore.dumpObject(tabOffset) } tabContentsOffset=${lincore.dumpObject(tabContentsOffset)}`);
+            //};
         }
+
+        
         
         setMark(m: boolean[], cipher: SimpleCipher, translation: Dict<string>) {
             this.mark = m;
@@ -88,16 +134,15 @@
         printDictionary(cipher: cryptogame.SimpleCipher, playerSubsts: Dict<string>) {
             // row: subst, letter, count
             var output: string[] = [];
-            for (var i = 0; i < cipher.alphabet.letters.length; i++) {
-                var letter = cipher.alphabet.letters[i];
-                var s1: string = playerSubsts[cipher.alphabet.letters[i]] || "";
-                s1 = lincore.padRight(s1, cipher.maxLetterLength);
-                var s2 = cipher.alphabet.substitutes[i];
-                var count = cipher.letterCounts[letter];
+            for (var i = 0; i < cipher.alphabet.substitutes.length; i++) {
+                var subst = cipher.alphabet.substitutes[i];
+                var transl: string = playerSubsts[subst] || "";
+                transl = lincore.padRight(transl, cipher.maxLetterLength);
+                var count = cipher.letterCounts[subst];
                 output.push(
                     `<div class="cipher_dict_row">
-                        <div class="cipher_dict_transl">${s1}</div>
-                        <div class="cipher_dict_subst" data-letter=${s2}>${s2}</div>
+                        <div class="cipher_dict_transl">${transl}</div>
+                        <div class="cipher_dict_subst" data-letter=${subst}>${subst}</div>
                         <div class="cipher_dict_count">${count}</div>
                     </div>`);
             }

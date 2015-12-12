@@ -9,6 +9,19 @@
             }
         }
 
+        clone(...except: string[]): Parameters {
+            var set = Set(except);
+            var dict: Dict<string> = {};
+            var keys = Object.keys(this.dict);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                var key = keys[i];
+                if (!set[key]) {
+                    dict[key] = this.dict[key];
+                }
+            }
+            return new Parameters(dict);
+        }
+
         remove(key: string): boolean {
             if (this.dict.hasOwnProperty(key)) {
                 delete this.dict[key];
@@ -31,13 +44,26 @@
         }
 
         getInt(key: string, def?: number) {
-            var num = parseInt(this.dict[key]);
-            return num !== NaN ? num : def;
+            if (!this.dict.hasOwnProperty(key)) return def;
+            var int = parseInt(this.dict[key]);
+            if (!isNaN(int)) {
+                return int;
+            } else {
+                return def !== undefined ? def : int;
+            }
         }
 
         getFloat(key: string, def?: number) {
             var num = parseFloat(this.dict[key]);
             return num !== NaN ? num : def;
+        }
+
+        toJson() {
+            return JSON.stringify(this.dict);
+        }
+
+        static fromJson(json: string): Parameters {
+            return new Parameters(JSON.parse(json));
         }
 
         private fromSearchString(str: string) {

@@ -79,12 +79,15 @@ declare module lincore {
     class Parameters {
         dict: Dict<string>;
         constructor(dict: Dict<string> | string);
+        clone(...except: string[]): Parameters;
         remove(key: string): boolean;
         has(key: string): boolean;
         set(key: string, value: string): void;
         get(key: string, def?: string): string;
         getInt(key: string, def?: number): number;
         getFloat(key: string, def?: number): number;
+        toJson(): string;
+        static fromJson(json: string): Parameters;
         private fromSearchString(str);
         toSearchString(...exceptions: string[]): string;
     }
@@ -92,6 +95,7 @@ declare module lincore {
 declare module lincore {
     function Set(arry: any[]): any;
     function getInvertedKvs(obj: {}): {};
+    function dumpObject(obj: Object): string;
     function flatcopy(obj: {}): {};
     function parseSearchString(str: string): Dict<string>;
     function getUrlPart(str: string): string;
@@ -140,6 +144,7 @@ declare module cryptogame {
         msgIdElem: JQuery;
         charPickerDlg: JQuery;
         charPickerSubst: JQuery;
+        tabControl: lincore.TabControl;
         timePassed: number;
         mark: boolean[];
         constructor(params: lincore.Parameters);
@@ -218,4 +223,30 @@ declare module cryptogame {
         show(subst: string): void;
         hide(): void;
     }
+}
+declare module lincore {
+    class TabControl {
+        private hiddenCssClass;
+        private selectedCssClass;
+        private tabControlCssClass;
+        private tabs;
+        private contents;
+        private TAB_ATTRIB;
+        private selectedTab;
+        onTabSelectCallback: (tab: JQuery, content: JQuery) => void;
+        onTabDeselectCallback: (tab: JQuery, content: JQuery) => void;
+        constructor(tabs: (string | JQuery), content: (string | JQuery), container?: (string | JQuery), hiddenCssClass?: string, selectedCssClass?: string, tabControlCssClass?: string);
+        init(initialTab?: string | number, selectionEvents?: string, deselectionEvents?: string): void;
+        count(): number;
+        private getContent(tab);
+        deselect(): void;
+        select(selector: string | number): void;
+        selectElement(tab: JQuery): void;
+        private static onTabSelect(event);
+        private static onTabDeselect(event);
+    }
+}
+declare module lincore {
+    function makeExpandable(head: JQuery, body: JQuery, expandedCssClass?: string, duration?: number): void;
+    function makeAllExpandable(elements: JQuery, headRefAttribute?: string, expandedCssClass?: string, duration?: number): void;
 }

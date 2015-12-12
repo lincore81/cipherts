@@ -19,6 +19,18 @@
         return ans;
     }
 
+
+    export function dumpObject(obj: Object): string {
+        var builder = [];
+        var keys = Object.keys(obj);
+        for (var i = 0, len = keys.length; i < len; i++) {
+            var key = keys[i];
+            if (obj.hasOwnProperty(key)) {
+                builder.push('"' + key + '": ' + obj[key]);
+            }
+        }        
+        return "{" + builder.join(", ") + "}";
+    }
     
     export function flatcopy(obj: {}): {} {
         if (null == obj || "object" != typeof obj) return obj;

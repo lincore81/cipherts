@@ -45,6 +45,7 @@
     <TypeScriptCompile Include="cipher_simple.ts" />
     <TypeScriptCompile Include="data\covert_data.ts" />
     <TypeScriptCompile Include="SubstitutionPicker.ts" />
+    <TypeScriptCompile Include="tab_control.ts" />
     <TypeScriptCompile Include="util\keys.ts" />
     <TypeScriptCompile Include="util\param.ts" />
     <TypeScriptCompile Include="util\random.ts">
