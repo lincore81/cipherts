@@ -86,7 +86,9 @@ var cryptogame;
             }
             for (var i = 0; i < this.cipher.length; i++) {
                 var letter = this.cipher[i];
-                this.letterCounts[letter]++;
+                if (this.letterCounts.hasOwnProperty(letter)) {
+                    this.letterCounts[letter]++;
+                }
             }
             return this.letterCounts;
         };
@@ -309,7 +311,8 @@ covertActionData.alphabets["latin"] = {
     substitutes: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
         "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 };
-covertActionData.alphabets["en_latin+bigrams"] = {
+covertActionData.alphabets["default"] = covertActionData.alphabets["latin"];
+covertActionData.alphabets["en_latin_bigrams"] = {
     name: "Latin plus most common bigrams in the English language.",
     punctuation: covertActionData.alphabets["latin"].punctuation,
     letters: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
@@ -317,7 +320,7 @@ covertActionData.alphabets["en_latin+bigrams"] = {
         "TH", "HE", "IN", "ER", "AN", "RE", "ND", "AT", "ON", "NT"],
     substitutes: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
         "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        "$0", "$1", "$2", "$3", "$4", "$5", "$6", "$7", "$8", "$9"]
 };
 /* more bigrams for later ;)
 th 1.52       en 0.55       ng 0.18
@@ -696,6 +699,22 @@ var lincore;
                 this.dict = dict || {};
             }
         }
+        Parameters.prototype.clone = function () {
+            var except = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                except[_i - 0] = arguments[_i];
+            }
+            var set = lincore.Set(except);
+            var dict = {};
+            var keys = Object.keys(this.dict);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                var key = keys[i];
+                if (!set[key]) {
+                    dict[key] = this.dict[key];
+                }
+            }
+            return new Parameters(dict);
+        };
         Parameters.prototype.remove = function (key) {
             if (this.dict.hasOwnProperty(key)) {
                 delete this.dict[key];
@@ -715,12 +734,25 @@ var lincore;
             return this.dict[key] || def;
         };
         Parameters.prototype.getInt = function (key, def) {
-            var num = parseInt(this.dict[key]);
-            return num !== NaN ? num : def;
+            if (!this.dict.hasOwnProperty(key))
+                return def;
+            var int = parseInt(this.dict[key]);
+            if (!isNaN(int)) {
+                return int;
+            }
+            else {
+                return def !== undefined ? def : int;
+            }
         };
         Parameters.prototype.getFloat = function (key, def) {
             var num = parseFloat(this.dict[key]);
             return num !== NaN ? num : def;
+        };
+        Parameters.prototype.toJson = function () {
+            return JSON.stringify(this.dict);
+        };
+        Parameters.fromJson = function (json) {
+            return new Parameters(JSON.parse(json));
         };
         Parameters.prototype.fromSearchString = function (str) {
             var _this = this;
@@ -774,6 +806,18 @@ var lincore;
         return ans;
     }
     lincore.getInvertedKvs = getInvertedKvs;
+    function dumpObject(obj) {
+        var builder = [];
+        var keys = Object.keys(obj);
+        for (var i = 0, len = keys.length; i < len; i++) {
+            var key = keys[i];
+            if (obj.hasOwnProperty(key)) {
+                builder.push('"' + key + '": ' + obj[key]);
+            }
+        }
+        return "{" + builder.join(", ") + "}";
+    }
+    lincore.dumpObject = dumpObject;
     function flatcopy(obj) {
         if (null == obj || "object" != typeof obj)
             return obj;
@@ -912,7 +956,8 @@ var cryptogame;
             this.message = this.composer.compose(this.db, template, theatre);
         };
         GameLogic.prototype.createCipher = function () {
-            this.alphabet = this.db.alphabets[this.params.get("alphabet", "latin")];
+            var alphabetName = this.params.get("alphabet", this.difficulty["alphabet"] || "default");
+            this.alphabet = this.db.alphabets[alphabetName];
             this.cipher = new cryptogame.SimpleCipher(this.alphabet, this.difficulty);
             this.cipher.encode(this.message);
             this.cipher.countLetters();
@@ -921,12 +966,15 @@ var cryptogame;
     })();
     cryptogame.GameLogic = GameLogic;
 })(cryptogame || (cryptogame = {}));
+///<require path="tab_control.ts" />
+///<require path="util/domutil.ts" />
 var cryptogame;
 (function (cryptogame) {
     var GameView = (function () {
         function GameView(params) {
             this.printer = new HtmlPrinter(params.getInt("width"));
             this.params = params;
+            this.tabControl = new lincore.TabControl("li.tab", "div#tab_contents div.content", undefined);
         }
         GameView.prototype.init = function () {
             $(".noscript").addClass("hidden");
@@ -939,6 +987,43 @@ var cryptogame;
             this.winDlgElem = $("#win_dlg");
             this.charPickerDlg = $("char_picker");
             this.charPickerSubst = $("#char_picker_subst");
+            $("#footer").removeClass("hidden");
+            var expandables = $(".expandable");
+            expandables.slideToggle(0);
+            lincore.makeAllExpandable(expandables);
+            this.tabControl.init(undefined, "mouseenter");
+            var self = this;
+            var deselect = $("li#deselect_tab");
+            deselect.click(function (event) {
+                console.log("deselect!");
+                self.tabControl.deselect();
+            });
+            this.tabControl.onTabSelectCallback = function (tab, content) {
+                deselect.css("visibility", "unset");
+            };
+            this.tabControl.onTabDeselectCallback = function (tab, content) {
+                deselect.css("visibility", "hidden");
+            };
+            var tabContents = $("div#tab_contents");
+            var footer = $("div#footer");
+            $("div#tabcontrol").mouseleave(function (e) { self.tabControl.deselect(); });
+            //this.tabControl.onTabSelectCallback = (tab, content) => {
+            //    var tabOffset = tab.offset();
+            //    var tabWidth = tab.width();
+            //    var documentWidth = $(document).width();
+            //    var halign = (tabOffset.left + tabWidth / 2) / documentWidth;
+            //    var tabContentsOffset = { top: tabOffset.top - tab.height(), left: 0 };
+            //    console.log(halign);
+            //    if (halign < 0.334) {
+            //        tabContentsOffset.left = tabOffset.left;
+            //    } else if (halign >= 0.667) {
+            //        tabContentsOffset.left = tabOffset.left + tabWidth - tabContents.width();
+            //    } else {
+            //        tabContentsOffset.left = tabOffset.left + (tabWidth - tabContents.width()) / 2;
+            //    }
+            //    tabContents.offset(tabContentsOffset);
+            //    console.log(`tabOffset=${lincore.dumpObject(tabOffset) } tabContentsOffset=${lincore.dumpObject(tabContentsOffset)}`);
+            //};
         };
         GameView.prototype.setMark = function (m, cipher, translation) {
             this.mark = m;
@@ -986,13 +1071,12 @@ var cryptogame;
         HtmlPrinter.prototype.printDictionary = function (cipher, playerSubsts) {
             // row: subst, letter, count
             var output = [];
-            for (var i = 0; i < cipher.alphabet.letters.length; i++) {
-                var letter = cipher.alphabet.letters[i];
-                var s1 = playerSubsts[cipher.alphabet.letters[i]] || "";
-                s1 = lincore.padRight(s1, cipher.maxLetterLength);
-                var s2 = cipher.alphabet.substitutes[i];
-                var count = cipher.letterCounts[letter];
-                output.push("<div class=\"cipher_dict_row\">\n                        <div class=\"cipher_dict_transl\">" + s1 + "</div>\n                        <div class=\"cipher_dict_subst\" data-letter=" + s2 + ">" + s2 + "</div>\n                        <div class=\"cipher_dict_count\">" + count + "</div>\n                    </div>");
+            for (var i = 0; i < cipher.alphabet.substitutes.length; i++) {
+                var subst = cipher.alphabet.substitutes[i];
+                var transl = playerSubsts[subst] || "";
+                transl = lincore.padRight(transl, cipher.maxLetterLength);
+                var count = cipher.letterCounts[subst];
+                output.push("<div class=\"cipher_dict_row\">\n                        <div class=\"cipher_dict_transl\">" + transl + "</div>\n                        <div class=\"cipher_dict_subst\" data-letter=" + subst + ">" + subst + "</div>\n                        <div class=\"cipher_dict_count\">" + count + "</div>\n                    </div>");
             }
             return output.join("");
         };
@@ -1275,4 +1359,140 @@ var cryptogame;
     })();
     cryptogame.SubstitutionPickerDlg = SubstitutionPickerDlg;
 })(cryptogame || (cryptogame = {}));
+///<reference path="jquery.d.ts" />
+var lincore;
+(function (lincore) {
+    function asJQuery(arg, container) {
+        var isString = typeof arg === "string" || arg instanceof String;
+        if (isString) {
+            return container ? container.children(arg) : $(arg);
+        }
+        else {
+            return arg;
+        }
+    }
+    var TabControl = (function () {
+        function TabControl(tabs, content, container, hiddenCssClass, selectedCssClass, tabControlCssClass) {
+            if (hiddenCssClass === void 0) { hiddenCssClass = "hidden"; }
+            if (selectedCssClass === void 0) { selectedCssClass = "selected"; }
+            if (tabControlCssClass === void 0) { tabControlCssClass = "tab_controlled"; }
+            this.TAB_ATTRIB = "data-tab";
+            container = container ? asJQuery(container) : undefined;
+            this.tabs = asJQuery(tabs, container);
+            this.contents = asJQuery(content, container);
+            this.selectedTab = null;
+            this.hiddenCssClass = hiddenCssClass;
+            this.selectedCssClass = selectedCssClass;
+            this.tabControlCssClass = tabControlCssClass;
+            if (this.tabs.length !== this.contents.length) {
+                console.warn("TabControl: number of tabs differs from number of contents, ignoring surplus.");
+                var len = Math.min(this.tabs.length, this.contents.length);
+                if (this.tabs.length > len) {
+                    this.tabs = this.tabs.slice(0, len);
+                }
+                else {
+                    this.contents = this.contents.slice(0, len);
+                }
+            }
+        }
+        TabControl.prototype.init = function (initialTab, selectionEvents, deselectionEvents) {
+            if (selectionEvents === void 0) { selectionEvents = "click"; }
+            var i;
+            var len = Math.min(this.tabs.length, this.contents.length);
+            for (i = 0; i < len; i++) {
+                var tab = this.tabs[i];
+                tab.setAttribute(this.TAB_ATTRIB, "" + i);
+                var content = this.contents[i];
+                content.setAttribute(this.TAB_ATTRIB, "" + i);
+            }
+            this.tabs.bind(selectionEvents, this, TabControl.onTabSelect);
+            if (deselectionEvents) {
+                this.tabs.bind(deselectionEvents, this, TabControl.onTabDeselect);
+            }
+            this.deselect();
+            if (initialTab !== undefined)
+                this.select(initialTab || 0);
+        };
+        TabControl.prototype.count = function () {
+            return this.tabs.length;
+        };
+        TabControl.prototype.getContent = function (tab) {
+            var id = parseInt(tab.attr(this.TAB_ATTRIB));
+            return (id != NaN) ? $(this.contents[id]) : null;
+        };
+        TabControl.prototype.deselect = function () {
+            if (this.selectedTab && this.onTabDeselectCallback) {
+                var content = this.getContent(this.selectedTab);
+                this.onTabDeselectCallback(this.selectedTab, content);
+            }
+            this.tabs.removeClass(this.selectedCssClass);
+            this.contents.addClass(this.hiddenCssClass);
+            this.selectedTab = null;
+        };
+        TabControl.prototype.select = function (selector) {
+            var tab;
+            var isString = typeof selector === "string" || selector instanceof String;
+            if (isString) {
+                tab = this.tabs.filter(selector);
+            }
+            else {
+                tab = $(this.tabs[selector]);
+            }
+            this.selectElement(tab);
+        };
+        TabControl.prototype.selectElement = function (tab) {
+            if (this.selectedTab) {
+                var isSelectedTab = tab.attr(this.TAB_ATTRIB) === this.selectedTab.attr(this.TAB_ATTRIB);
+                if (isSelectedTab)
+                    return;
+            }
+            var content = this.getContent(tab);
+            console.assert(content !== null, "no content for tab: " + tab);
+            this.deselect();
+            tab.addClass(this.selectedCssClass);
+            content.removeClass(this.hiddenCssClass);
+            this.selectedTab = tab;
+            if (this.onTabSelectCallback) {
+                this.onTabSelectCallback(tab, content);
+            }
+        };
+        TabControl.onTabSelect = function (event) {
+            var instance = event.data;
+            instance.selectElement($(event.target));
+        };
+        TabControl.onTabDeselect = function (event) {
+            var instance = event.data;
+            instance.deselect();
+        };
+        return TabControl;
+    })();
+    lincore.TabControl = TabControl;
+})(lincore || (lincore = {}));
+var lincore;
+(function (lincore) {
+    function makeExpandable(head, body, expandedCssClass, duration) {
+        if (expandedCssClass === void 0) { expandedCssClass = "expanded"; }
+        var isExpanded = function () { return body.height() > 0; };
+        head.click(function (e) {
+            if (isExpanded()) {
+                head.removeClass(expandedCssClass);
+            }
+            else {
+                head.addClass(expandedCssClass);
+            }
+            body.slideToggle(duration);
+        });
+    }
+    lincore.makeExpandable = makeExpandable;
+    function makeAllExpandable(elements, headRefAttribute, expandedCssClass, duration) {
+        if (headRefAttribute === void 0) { headRefAttribute = "data-head"; }
+        if (expandedCssClass === void 0) { expandedCssClass = "expanded"; }
+        for (var i = 0, len = elements.length; i < len; i++) {
+            var body = $(elements[i]);
+            var head = $(body.attr(headRefAttribute));
+            makeExpandable(head, body, expandedCssClass, duration);
+        }
+    }
+    lincore.makeAllExpandable = makeAllExpandable;
+})(lincore || (lincore = {}));
 //# sourceMappingURL=out.js.map
