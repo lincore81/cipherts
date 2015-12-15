@@ -183,7 +183,6 @@ span.cipher_msg_subst, span.cipher_msg_letter {
 /*#endregion cipher*/
 /*#region "misc ui elements"*/
 #footer {
-  background-color: black;
   color: indianred;
   padding: 2px;
   font-size: 0.9em;
@@ -200,7 +199,6 @@ span.cipher_msg_subst, span.cipher_msg_letter {
   min-width: 60%;
   max-width: 100%;
   left: 50%;
-  background-color: black;
   transform: translateX(-50%);
   -moz-transform: translateX(-50%);
   -ms-transform: translateX(-50%);

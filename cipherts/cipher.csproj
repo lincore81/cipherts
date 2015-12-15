@@ -47,6 +47,7 @@
     <TypeScriptCompile Include="data\covert_data.ts" />
     <TypeScriptCompile Include="SubstitutionPicker.ts" />
     <TypeScriptCompile Include="tab_control.ts" />
+    <TypeScriptCompile Include="ui\settings_panel.ts" />
     <TypeScriptCompile Include="util\domutil.ts" />
     <TypeScriptCompile Include="util\keys.ts" />
     <TypeScriptCompile Include="util\param.ts" />

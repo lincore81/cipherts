@@ -68,7 +68,7 @@ module cryptogame {
         createCipher() {
             var diff = settings.params.getInt("difficulty", 0);
             this.difficulty = this.db.difficulties[diff];
-            var alphabetName = settings.params.get("alphabet", this.difficulty["alphabet"] || "default");
+            var alphabetName = this.difficulty.options["alphabet"] || "default";
             this.alphabet = this.db.alphabets[alphabetName];
             this.cipher = new SimpleCipher(this.alphabet, this.difficulty.options);
             this.cipher.encode(this.message);

@@ -74,12 +74,12 @@ covertActionData.difficulties = [
         options: { stripPunctuation: true, stripWhitespace: true }
     }, {
         name: "Very challenging",
-        desc: "whitespace, punctuation, single character letters and most common digrams",
+        desc: "whitespace, punctuation, single character letters and most common digrams (multi-character letters can not be typed with keyboard atm, use the mouse instead)",
         id: 4,
         options: { alphabet: "en_latin_bigrams" }
     }, {
         name: "Barely possible",
-        desc: "no whitespace, no punctuation, single character letters and most common digrams",
+        desc: "no whitespace, no punctuation, single character letters and most common digrams (multi-character letters can not be typed with keyboard atm, use the mouse instead)",
         id: 5,
         options: {
             alphabet: "en_latin_bigrams",

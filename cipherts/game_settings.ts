@@ -11,11 +11,20 @@ module cryptogame.settings {
     }
 
     export function loadLocalStorage() {
+        if (!window.localStorage) {
+            console.log("local storage not available, can not load.");
+            params = new lincore.Parameters();
+            return;
+        }
         var json = <string>window.localStorage.getItem("settings");
         params = lincore.Parameters.fromJson(json);
     }
 
     export function saveToLocalStorage() {
+        if (!window.localStorage) {
+            console.log("local storage not available, can not load.");
+            return;
+        }
         var clone = params.clone("seed");
         window.localStorage.setItem("settings", clone.toJson());
     }
