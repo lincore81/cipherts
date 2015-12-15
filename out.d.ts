@@ -4,6 +4,12 @@ interface Dict<T> {
 }
 declare module cryptogame {
     type GameLocation = [string, string];
+    interface Difficulty {
+        name: string;
+        desc: string;
+        id: number;
+        options: {};
+    }
     interface MissionTheatre {
         organizations: string[];
         locations: GameLocation[];
@@ -22,6 +28,7 @@ declare module cryptogame {
         variables: Dict<any[]>;
         theatres: Dict<MissionTheatre>;
         alphabets: Dict<Alphabet>;
+        difficulties: Difficulty[];
         makeQueryFunc: (theatreName?: string, Random?: lincore.Random) => ((name: string, key: string | number) => string);
     }
     var HTML: {
@@ -78,11 +85,12 @@ declare var covertActionData: cryptogame.GameDatabase;
 declare module lincore {
     class Parameters {
         dict: Dict<string>;
-        constructor(dict: Dict<string> | string);
+        constructor(dict?: Dict<string> | string);
         clone(...except: string[]): Parameters;
         remove(key: string): boolean;
         has(key: string): boolean;
         set(key: string, value: string): void;
+        setAllIn(other: Parameters): Parameters;
         get(key: string, def?: string): string;
         getInt(key: string, def?: number): number;
         getFloat(key: string, def?: number): number;
@@ -107,22 +115,19 @@ declare module lincore {
 }
 declare module cryptogame {
     class GameLogic {
-        params: lincore.Parameters;
         cipher: SimpleCipher;
         random: lincore.Random;
         composer: MessageComposer;
+        difficulty: Difficulty;
         alphabet: Alphabet;
-        datasets: Dict<GameDatabase>;
-        difficulties: {}[];
-        difficulty: {};
         db: GameDatabase;
         message: string;
         translation: Dict<string>;
         onNewGame: (gameLogic: GameLogic) => void;
         onTranslChange: (gameLogic: GameLogic) => void;
         onGameWon: (gameLogic: GameLogic) => void;
-        constructor(params: lincore.Parameters, data: Dict<GameDatabase>, difficulties: {}[]);
-        newGame(): void;
+        constructor();
+        newGame(db: GameDatabase): void;
         addTranslation(subst: string, transl?: string): boolean;
         isGameWon(): boolean;
         hasSubstitute(subst: any): boolean;
@@ -131,10 +136,16 @@ declare module cryptogame {
         createCipher(): void;
     }
 }
+declare module cryptogame.settings {
+    var params: lincore.Parameters;
+    function init(searchstr: string): void;
+    function loadLocalStorage(): void;
+    function saveToLocalStorage(): void;
+    function setDifficulty(difficulty: Difficulty): void;
+}
 declare module cryptogame {
     class GameView {
         printer: HtmlPrinter;
-        params: lincore.Parameters;
         messageElem: JQuery;
         tryAnotherElem: JQuery;
         winDlgElem: JQuery;
@@ -147,8 +158,9 @@ declare module cryptogame {
         tabControl: lincore.TabControl;
         timePassed: number;
         mark: boolean[];
-        constructor(params: lincore.Parameters);
+        constructor();
         init(): void;
+        populateDifficultySettings(difficulties: {}, elem: JQuery, callback: (difficulty: {}) => void): void;
         setMark(m: boolean[], cipher: SimpleCipher, translation: Dict<string>): void;
         private getTimerFunc();
         print(cipher: SimpleCipher, translation: Dict<string>): void;
@@ -183,20 +195,13 @@ declare module cryptogame {
         logic: GameLogic;
         view: GameView;
         pickerDlg: SubstitutionPickerDlg;
-        params: lincore.Parameters;
         datasets: Dict<GameDatabase>;
-        difficulties: ({} | {
-            stripPunctuation: boolean;
-        } | {
-            stripWhitespace: boolean;
-        } | {
-            stripPunctuation: boolean;
-            stripWhitespace: boolean;
-        })[];
+        data: GameDatabase;
         ngramInput: JQuery;
         ngramClear: JQuery;
         ngramFilter: string;
         enteredSubst: string;
+        settingsPanel: ui.SettingsPanel;
         constructor();
         init(): void;
         win(): void;
@@ -244,6 +249,12 @@ declare module lincore {
         selectElement(tab: JQuery): void;
         private static onTabSelect(event);
         private static onTabDeselect(event);
+    }
+}
+declare module cryptogame.ui {
+    class SettingsPanel {
+        private printDifficultySettings(data, output);
+        print(data: GameDatabase, $elem: JQuery, callback: (key: string, val: string) => void): void;
     }
 }
 declare module lincore {
