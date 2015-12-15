@@ -7,14 +7,11 @@
 
 module cryptogame {
     export class GameLogic {
-        params: lincore.Parameters;
         cipher: SimpleCipher;
         random: lincore.Random;
         composer: MessageComposer;
+        difficulty: Difficulty;
         alphabet: Alphabet;
-        datasets: Dict<GameDatabase>;
-        difficulties: {}[];
-        difficulty: {};
         db: GameDatabase;
         message: string;
         translation: Dict<string>;      
@@ -23,16 +20,13 @@ module cryptogame {
         onTranslChange: (gameLogic: GameLogic) => void;
         onGameWon: (gameLogic: GameLogic) => void;
 
-        constructor(params: lincore.Parameters, data: Dict<GameDatabase>, difficulties: {}[]) {
-            this.params = params;
-            this.datasets = data;
-            this.difficulties = difficulties;            
-            this.difficulty = difficulties[params.getInt("difficulty", 0)];
-            this.random = new lincore.Random(params.getInt("seed"));
+        constructor() {
+            this.random = new lincore.Random(settings.params.getInt("seed"));
             this.composer = new MessageComposer(this.random);
         }
 
-        newGame() {
+        newGame(db: GameDatabase) {
+            this.db = db;
             this.createMessage();
             this.createCipher();
             this.translation = {};
@@ -66,17 +60,17 @@ module cryptogame {
             return this.cipher.alphabet.letters.indexOf(letter) != -1;
         }
         createMessage() {
-            var key = this.params.get("db", "default");
-            this.db = this.datasets[key];
-            var theatre = this.params.get("theatre");
-            var template = this.params.get("template");
+            var theatre = settings.params.get("theatre");
+            var template = settings.params.get("template");
             this.message = this.composer.compose(this.db, template, theatre);
         }
 
         createCipher() {
-            var alphabetName = this.params.get("alphabet", this.difficulty["alphabet"] || "default");
+            var diff = settings.params.getInt("difficulty", 0);
+            this.difficulty = this.db.difficulties[diff];
+            var alphabetName = settings.params.get("alphabet", this.difficulty["alphabet"] || "default");
             this.alphabet = this.db.alphabets[alphabetName];
-            this.cipher = new SimpleCipher(this.alphabet, this.difficulty);
+            this.cipher = new SimpleCipher(this.alphabet, this.difficulty.options);
             this.cipher.encode(this.message);
             this.cipher.countLetters();
         }

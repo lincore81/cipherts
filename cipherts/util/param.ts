@@ -1,7 +1,7 @@
 ﻿module lincore {
     export class Parameters {
         dict: Dict<string>;
-        constructor(dict: Dict<string> | string) {
+        constructor(dict?: Dict<string> | string) {
             if (typeof dict === "string") {
                 this.fromSearchString(dict);
             } else {
@@ -37,6 +37,15 @@
 
         set(key: string, value: string) {
             this.dict[key] = value;
+        }
+
+        setAllIn(other: Parameters) {
+            var keys = Object.keys(other.dict);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                var k = keys[i];
+                this.dict[k] = other.dict[k];
+            }
+            return this;
         }
 
         get(key: string, def?: string) {

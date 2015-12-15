@@ -258,6 +258,7 @@ var covertActionData = {
     components: {},
     variables: {},
     theatres: {},
+    difficulties: null,
     makeQueryFunc: null
 };
 covertActionData.makeQueryFunc = function (theatreName, random) {
@@ -300,6 +301,43 @@ covertActionData.makeQueryFunc = function (theatreName, random) {
         return (typeof v === "string") ? v : "" + v;
     };
 };
+covertActionData.difficulties = [
+    {
+        name: "Very easy",
+        desc: "whitespace, punctuation, single character letters",
+        id: 0,
+        options: {}
+    }, {
+        name: "Easy",
+        desc: "whitespace, no punctuation, single character letters",
+        id: 1,
+        options: { stripPunctuation: true }
+    }, {
+        name: "Moderate",
+        desc: "no whitespace, punctuation, single character letters",
+        id: 2,
+        options: { stripWhitespace: true }
+    }, {
+        name: "Challenging",
+        desc: "no whitespace, no punctuation, single character letters",
+        id: 3,
+        options: { stripPunctuation: true, stripWhitespace: true }
+    }, {
+        name: "Very challenging",
+        desc: "whitespace, punctuation, single character letters and most common digrams",
+        id: 4,
+        options: { alphabet: "en_latin_bigrams" }
+    }, {
+        name: "Barely possible",
+        desc: "no whitespace, no punctuation, single character letters and most common digrams",
+        id: 5,
+        options: {
+            alphabet: "en_latin_bigrams",
+            stripWhitespace: true,
+            stripPunctuation: true
+        }
+    }
+];
 covertActionData.templates["full"] = [
     "message", "rcvorgref", "sndorgref", "rcvlocref", "sndlocref", "fluff"
 ];
@@ -730,6 +768,14 @@ var lincore;
         Parameters.prototype.set = function (key, value) {
             this.dict[key] = value;
         };
+        Parameters.prototype.setAllIn = function (other) {
+            var keys = Object.keys(other.dict);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                var k = keys[i];
+                this.dict[k] = other.dict[k];
+            }
+            return this;
+        };
         Parameters.prototype.get = function (key, def) {
             return this.dict[key] || def;
         };
@@ -909,15 +955,12 @@ var lincore;
 var cryptogame;
 (function (cryptogame) {
     var GameLogic = (function () {
-        function GameLogic(params, data, difficulties) {
-            this.params = params;
-            this.datasets = data;
-            this.difficulties = difficulties;
-            this.difficulty = difficulties[params.getInt("difficulty", 0)];
-            this.random = new lincore.Random(params.getInt("seed"));
+        function GameLogic() {
+            this.random = new lincore.Random(cryptogame.settings.params.getInt("seed"));
             this.composer = new cryptogame.MessageComposer(this.random);
         }
-        GameLogic.prototype.newGame = function () {
+        GameLogic.prototype.newGame = function (db) {
+            this.db = db;
             this.createMessage();
             this.createCipher();
             this.translation = {};
@@ -949,16 +992,16 @@ var cryptogame;
             return this.cipher.alphabet.letters.indexOf(letter) != -1;
         };
         GameLogic.prototype.createMessage = function () {
-            var key = this.params.get("db", "default");
-            this.db = this.datasets[key];
-            var theatre = this.params.get("theatre");
-            var template = this.params.get("template");
+            var theatre = cryptogame.settings.params.get("theatre");
+            var template = cryptogame.settings.params.get("template");
             this.message = this.composer.compose(this.db, template, theatre);
         };
         GameLogic.prototype.createCipher = function () {
-            var alphabetName = this.params.get("alphabet", this.difficulty["alphabet"] || "default");
+            var diff = cryptogame.settings.params.getInt("difficulty", 0);
+            this.difficulty = this.db.difficulties[diff];
+            var alphabetName = cryptogame.settings.params.get("alphabet", this.difficulty["alphabet"] || "default");
             this.alphabet = this.db.alphabets[alphabetName];
-            this.cipher = new cryptogame.SimpleCipher(this.alphabet, this.difficulty);
+            this.cipher = new cryptogame.SimpleCipher(this.alphabet, this.difficulty.options);
             this.cipher.encode(this.message);
             this.cipher.countLetters();
         };
@@ -966,14 +1009,41 @@ var cryptogame;
     })();
     cryptogame.GameLogic = GameLogic;
 })(cryptogame || (cryptogame = {}));
+///<require path="definitions.ts" />
+///<require path="util/param.ts" />
+var cryptogame;
+(function (cryptogame) {
+    var settings;
+    (function (settings) {
+        function init(searchstr) {
+            loadLocalStorage();
+            console.log(settings.params.dict);
+            settings.params.setAllIn(new lincore.Parameters(searchstr));
+        }
+        settings.init = init;
+        function loadLocalStorage() {
+            var json = window.localStorage.getItem("settings");
+            settings.params = lincore.Parameters.fromJson(json);
+        }
+        settings.loadLocalStorage = loadLocalStorage;
+        function saveToLocalStorage() {
+            var clone = settings.params.clone("seed");
+            window.localStorage.setItem("settings", clone.toJson());
+        }
+        settings.saveToLocalStorage = saveToLocalStorage;
+        function setDifficulty(difficulty) {
+            settings.params.set("difficulty", "" + difficulty.id);
+        }
+        settings.setDifficulty = setDifficulty;
+    })(settings = cryptogame.settings || (cryptogame.settings = {}));
+})(cryptogame || (cryptogame = {}));
 ///<require path="tab_control.ts" />
 ///<require path="util/domutil.ts" />
 var cryptogame;
 (function (cryptogame) {
     var GameView = (function () {
-        function GameView(params) {
-            this.printer = new HtmlPrinter(params.getInt("width"));
-            this.params = params;
+        function GameView() {
+            this.printer = new HtmlPrinter(cryptogame.settings.params.getInt("width"));
             this.tabControl = new lincore.TabControl("li.tab", "div#tab_contents div.content", undefined);
         }
         GameView.prototype.init = function () {
@@ -988,9 +1058,6 @@ var cryptogame;
             this.charPickerDlg = $("char_picker");
             this.charPickerSubst = $("#char_picker_subst");
             $("#footer").removeClass("hidden");
-            var expandables = $(".expandable");
-            expandables.slideToggle(0);
-            lincore.makeAllExpandable(expandables);
             this.tabControl.init(undefined, "mouseenter");
             var self = this;
             var deselect = $("li#deselect_tab");
@@ -1007,23 +1074,8 @@ var cryptogame;
             var tabContents = $("div#tab_contents");
             var footer = $("div#footer");
             $("div#tabcontrol").mouseleave(function (e) { self.tabControl.deselect(); });
-            //this.tabControl.onTabSelectCallback = (tab, content) => {
-            //    var tabOffset = tab.offset();
-            //    var tabWidth = tab.width();
-            //    var documentWidth = $(document).width();
-            //    var halign = (tabOffset.left + tabWidth / 2) / documentWidth;
-            //    var tabContentsOffset = { top: tabOffset.top - tab.height(), left: 0 };
-            //    console.log(halign);
-            //    if (halign < 0.334) {
-            //        tabContentsOffset.left = tabOffset.left;
-            //    } else if (halign >= 0.667) {
-            //        tabContentsOffset.left = tabOffset.left + tabWidth - tabContents.width();
-            //    } else {
-            //        tabContentsOffset.left = tabOffset.left + (tabWidth - tabContents.width()) / 2;
-            //    }
-            //    tabContents.offset(tabContentsOffset);
-            //    console.log(`tabOffset=${lincore.dumpObject(tabOffset) } tabContentsOffset=${lincore.dumpObject(tabContentsOffset)}`);
-            //};
+        };
+        GameView.prototype.populateDifficultySettings = function (difficulties, elem, callback) {
         };
         GameView.prototype.setMark = function (m, cipher, translation) {
             this.mark = m;
@@ -1053,7 +1105,7 @@ var cryptogame;
             this.timePassed = 0;
             this.timerHandle = setInterval(this.getTimerFunc(), 1000);
             this.winDlgElem.addClass("hidden");
-            var p = new lincore.Parameters(lincore.flatcopy(this.params.dict));
+            var p = new lincore.Parameters(lincore.flatcopy(cryptogame.settings.params.dict));
             p.dict["seed"] = "" + seed;
             var url = lincore.getUrlPart(window.location.href);
             this.msgIdElem.html("<a href=\"" + url + "/" + p.toSearchString() + "\" title=\"link to this cipher\">" + seed + "</a>,\n                 Len:" + msgLength);
@@ -1170,6 +1222,7 @@ var lincore;
     lincore.isSpecialKey = isSpecialKey;
 })(lincore || (lincore = {}));
 ///<reference path="jquery.d.ts" />
+///<require path="definitions.ts" />
 ///<reference path="game_logic.ts" />
 ///<reference path="game_view.ts" />
 ///<reference path="util/keys.ts" />
@@ -1187,17 +1240,14 @@ var cryptogame;
                 "covert_action": covertActionData,
                 "default": covertActionData
             };
-            this.difficulties = [
-                {},
-                { stripPunctuation: true },
-                { stripWhitespace: true },
-                { stripPunctuation: true, stripWhitespace: true }
-            ];
-            this.params = new lincore.Parameters(document.location.search);
-            this.logic = new cryptogame.GameLogic(this.params, this.datasets, this.difficulties);
-            this.view = new cryptogame.GameView(this.params);
+            cryptogame.settings.init(document.location.search);
+            var dbstr = cryptogame.settings.params.get("db", "default");
+            this.data = this.datasets[dbstr];
+            this.logic = new cryptogame.GameLogic();
+            this.view = new cryptogame.GameView();
             this.ngramFilter = "";
             this.pickerDlg = new cryptogame.SubstitutionPickerDlg();
+            this.settingsPanel = new cryptogame.ui.SettingsPanel();
         }
         GameController.prototype.init = function () {
             this.ngramInput = $('input[name="ngram_input"]');
@@ -1207,7 +1257,7 @@ var cryptogame;
             this.pickerDlg.init();
         };
         GameController.prototype.win = function () {
-            this.params.remove("seed");
+            cryptogame.settings.params.remove("seed");
             var transl = lincore.getInvertedKvs(this.logic.cipher.dictionary);
             this.view.print(this.logic.cipher, transl);
             this.view.showWinState();
@@ -1289,11 +1339,21 @@ var cryptogame;
         };
         GameController.prototype.play = function () {
             var seed = this.logic.random.seed;
-            this.logic.newGame();
+            this.logic.newGame(this.data);
             var cipher = this.logic.cipher;
             var msgLength = cipher.cipher.length;
             this.view.newGame(seed, msgLength, cipher.alphabet.letters);
             this.view.print(cipher, this.logic.translation);
+            var self = this;
+            this.settingsPanel.print(this.logic.db, $("div#game_settings"), function (k, v) {
+                if (k === "new game") {
+                    self.play();
+                }
+                else {
+                    cryptogame.settings.params.set(k, v);
+                    cryptogame.settings.saveToLocalStorage();
+                }
+            });
             var self = this;
             this.pickerDlg.populate(cipher.alphabet.letters, function (subst, transl) {
                 self.pickerDlg.hide();
@@ -1468,6 +1528,40 @@ var lincore;
     })();
     lincore.TabControl = TabControl;
 })(lincore || (lincore = {}));
+var cryptogame;
+(function (cryptogame) {
+    var ui;
+    (function (ui) {
+        var SettingsPanel = (function () {
+            function SettingsPanel() {
+            }
+            SettingsPanel.prototype.printDifficultySettings = function (data, output) {
+                var currentDiff = cryptogame.settings.params.getInt("difficulty", 0);
+                for (var i = 0, len = data.difficulties.length; i < len; i++) {
+                    var diff = data.difficulties[i];
+                    var selected = currentDiff === diff.id;
+                    output.push("<div>\n                        <input type=\"radio\" name=\"difficulty\" id=\"diff" + i + "\"\n                            value=\"" + i + "\"" + (selected ? ' checked="checked"' : " ") + ">\n                        <label for=\"diff" + i + "\">" + diff.name + "</label>\n                        <span class=\"description\">" + diff.desc + "</span>\n                    </div>");
+                }
+            };
+            SettingsPanel.prototype.print = function (data, $elem, callback) {
+                var diff = [];
+                this.printDifficultySettings(data, diff);
+                $elem.html("\n                <form class=\"settings_form\" action=\"javascript:void(0)\">\n                    <button id=\"new_game_btn\">Start a new Game</button>                    \n                    \n                    <div class=\"expandable_head\" id=\"settings_difficulty_head\">\n                        Difficulty\n                    </div>\n                    <div class=\"expandable\" data-head=\"div#settings_difficulty_head\">\n                        " + diff.join("\n") + "\n                    </div>\n                </form>");
+                var diffRadioBtns = $elem.find("input:radio[name=difficulty]");
+                diffRadioBtns.change(function (event) {
+                    var val = $('input:radio[name=difficulty]:checked').val();
+                    callback("difficulty", "" + val);
+                });
+                $("button#new_game_btn").click(function (event) { return callback("new game", "true"); });
+                //var expandables = $(".expandable");
+                //expandables.slideToggle(0);
+                //lincore.makeAllExpandable(expandables);
+            };
+            return SettingsPanel;
+        })();
+        ui.SettingsPanel = SettingsPanel;
+    })(ui = cryptogame.ui || (cryptogame.ui = {}));
+})(cryptogame || (cryptogame = {}));
 var lincore;
 (function (lincore) {
     function makeExpandable(head, body, expandedCssClass, duration) {

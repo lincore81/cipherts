@@ -4,8 +4,15 @@
 module cryptogame {
     export type GameLocation = [string, string];
 
+    export interface Difficulty {
+        name: string;
+        desc: string;
+        id: number;
+        options: {};
+    }
+
     export interface MissionTheatre {
-        organizations: string[]
+        organizations: string[];
         locations: GameLocation[];
     }
 
@@ -24,6 +31,7 @@ module cryptogame {
         variables: Dict<any[]>;
         theatres: Dict<MissionTheatre>;
         alphabets: Dict<Alphabet>;
+        difficulties: Difficulty[];
         makeQueryFunc: (theatreName?: string, Random?: lincore.Random) =>
             ((name: string, key: string | number) => string);
     }

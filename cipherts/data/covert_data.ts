@@ -8,6 +8,7 @@ var covertActionData: cryptogame.GameDatabase = {
     components: {},
     variables: {},
     theatres: {},
+    difficulties: null,
     makeQueryFunc: null
 }
 
@@ -49,6 +50,44 @@ covertActionData.makeQueryFunc = (theatreName?: string, random?: lincore.Random)
         return (typeof v === "string") ? v : "" + v;
     }
 }
+
+covertActionData.difficulties = [
+    {
+        name: "Very easy",
+        desc: "whitespace, punctuation, single character letters",
+        id: 0,
+        options: {}
+    }, {
+        name: "Easy",
+        desc: "whitespace, no punctuation, single character letters",
+        id: 1,
+        options: { stripPunctuation: true }
+    }, {
+        name: "Moderate",
+        desc: "no whitespace, punctuation, single character letters",
+        id: 2,
+        options: { stripWhitespace: true }
+    }, {
+        name: "Challenging",
+        desc: "no whitespace, no punctuation, single character letters",
+        id: 3,
+        options: { stripPunctuation: true, stripWhitespace: true }
+    }, {
+        name: "Very challenging",
+        desc: "whitespace, punctuation, single character letters and most common digrams",
+        id: 4,
+        options: { alphabet: "en_latin_bigrams" }
+    }, {
+        name: "Barely possible",
+        desc: "no whitespace, no punctuation, single character letters and most common digrams",
+        id: 5,
+        options: {
+            alphabet: "en_latin_bigrams",
+            stripWhitespace: true,
+            stripPunctuation: true
+        }
+    }
+];
 
 covertActionData.templates["full"] = [
     "message", "rcvorgref", "sndorgref", "rcvlocref", "sndlocref", "fluff"

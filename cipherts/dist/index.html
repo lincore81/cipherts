@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
     <head>
-        <meta charset="utf-8" />
+        <meta charset="utf-8"/>
         <title>Crypto Workstation</title>
         <link href='https://fonts.googleapis.com/css?family=VT323|Patrick+Hand&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="styles/covert_action.css" type="text/css" />
     </head>
     <body>
     <div class="noscript">
-        This game requires javascript to be played. 
+        This game requires javascript to be played.
         No external scripts will be loaded.
         No data will be collected in any form.
     </div>
@@ -37,7 +37,7 @@
                             find:<input accesskey="n" size="5" name="ngram_input" />
                             <button class="invisible" name="ngram_clear" title="clear search">X</button>
                             <span id="timer">00:00</span>
-                        </span> 
+                        </span>
                     </div>
                 </form>
                 <div id="cipher_message"></div>
@@ -49,11 +49,11 @@
                 <div id="char_picker_content">
                     <div id="char_picker_msg">
                         Pick a substitute for <span id="char_picker_subst"></span>
-                    </div>                    
+                    </div>
                     <div id="char_picker_letters">
                     </div>
                 </div>
-            </div>             
+            </div>
         </div>
         <div id="win_dlg" class="hidden">
             <div id="win_msg">MESSAGE DECODED</div>
@@ -64,92 +64,34 @@
         <div id="tab_contents">
             <div class="content hidden">
                 <div id="game_settings">
-                    <form action="javascript:void(0)">                        
-                        <h3 class="expandable_head" id="settings_difficulty_head">Difficulty</h3>
-                        <div class="expandable" data-head="h3#settings_difficulty_head">
-                            <div >
-                                <span>
-                                    <input id="diff0" type="radio" name="difficulty" value="0" />
-                                    <label for="diff0">Very easy</label>
-                                </span>
-                                <span >
-                                    whitespace, punctuation, single character letters
-                                </span>
-                            </div>
-                            <div>                                
-                                <span>
-                                    <input id="diff1" type="radio" name="difficulty" value="1" />
-                                    <label for="diff1">Easy</label>
-                                </span>
-                                <span>
-                                    whitespace, no punctuation, single character letters
-                                </span>
-                            </div>
-                            <div>
-                                <span>
-                                    <input id="diff2" type="radio" name="difficulty" value="2" />
-                                    <label for="diff2">Moderate</label>
-                                </span>
-                                <span>
-                                    no whitespace, punctuation, single character letters
-                                </span>
-                            </div>
-                            <div>
-                                <span >
-                                    <input id="diff3" type="radio" name="difficulty" value="0" />
-                                    <label for="diff3">Challenging</label>
-                                </span>
-                                <span>
-                                    no whitespace, no punctuation, single character letters
-                                </span>
-                            </div>
-                            <div>
-                                <span >
-                                    <input id="diff4" type="radio" name="difficulty" value="0" />
-                                    <label for="diff4">Barely possible</label>
-                                </span>
-                                <span>
-                                    whitespace, punctuation, single character letters and most common digrams
-                                </span>
-                            </div>
-                            <div>
-                                <span>
-                                    <input id="diff5" type="radio" name="difficulty" value="0" />
-                                    <label for="diff5">Impossible</label>
-                                </span>
-                                <span>
-                                    no whitespace, no punctuation, single character letters and most common digrams
-                                </span>
-                            </div>
-                        </div>
-                    </form>
+
                 </div>
             </div>
             <div class="content hidden">
-                In this game, your task is to solve substitution ciphers. 
-                Those are secret messages in which each letter is replaced 
+                In this game, your task is to solve substitution ciphers.
+                Those are secret messages in which each letter is replaced
                 by another, like all A's with X's, all X's with P's and so on.
                 <p>
-                    To play, type a letter occuring in the cipher (notice that 
+                    To play, type a letter occuring in the cipher (notice that
                     on the left the letter starts blinking), followed by either:
                     <ul>
                         <li>the letter you think it stands for,</li>
                         <li>space, which clears an existing binding or</li>
                         <li>escape to cancel.</li>
                     </ul>
-                    If your device does not have a hardware keyboard, you can 
-                    also click on any letter and then select a substitute from 
-                    a list. At the moment this is not very convenient for 
-                    mobile users, sorry for that. 
+                    If your device does not have a hardware keyboard, you can
+                    also click on any letter and then select a substitute from
+                    a list. At the moment this is not very convenient for
+                    mobile users, sorry for that.
                     Repeat this process until you decoded the entire message.
                 </p> <p>
-                    You can use the find input-field to highlight character 
+                    You can use the find input-field to highlight character
                     sequences in the cipher (alt+n in many browsers).
-                    The underscore "_" serves as wildcard for any one letter. 
+                    The underscore "_" serves as wildcard for any one letter.
                     For instance, you can highlight all three letter
                     words with X at the end using " __X " (only if the cipher
                     contains whitespace).
-                </p> 
+                </p>
                 <h3>A few tips for the desperate:</h3>
                 <ul>
                     <li>E is the most commonly used letter in the English language</li>
@@ -170,14 +112,14 @@
                     Programmed in <a href="http://www.typescriptlang.org/">TypeScript</a>
                     (statically typed js with extras) with <a href="https://jquery.com">jQuery</a>.
                 </p>
-                <p>This is a recreation of the cryptography minigame in 
+                <p>This is a recreation of the cryptography minigame in
                 <a href="https://en.wikipedia.org/wiki/Covert_Action" title="article on Wikipedia">Sid Meier's Covert Action</a>,
                 developed by Microprose and released in 1990.
-                I think it's a great game for its time. If you are interested, 
+                I think it's a great game for its time. If you are interested,
                 check it out on
                 <a href="http://www.gog.com/game/sid_meiers_covert_action" title="Covert Action on gog.com">gog.com</a>,
                 <a href="http://store.steampowered.com/app/327390/" title="Covert Action on steam">steam</a> or
-                <a href="http://retroism.com/sid-meiers-covert-action-2/" title="Covert Action on retroism">retroism.com</a> 
+                <a href="http://retroism.com/sid-meiers-covert-action-2/" title="Covert Action on retroism">retroism.com</a>
                 (the current owner afaik).</p>
             </div>
         </div>
@@ -189,7 +131,7 @@
     <!--<div id="">
 
     </div>-->
-    
+
     <script type="text/javascript" src="jquery-1.11.3.js"></script>
     <script src="out.js"></script>
     </body>

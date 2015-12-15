@@ -4,7 +4,6 @@
 module cryptogame {
     export class GameView {
         printer: HtmlPrinter;
-        params: lincore.Parameters;
         messageElem: JQuery;
         tryAnotherElem: JQuery;
         winDlgElem: JQuery;
@@ -18,9 +17,8 @@ module cryptogame {
         timePassed: number;
         mark: boolean[];
 
-        constructor(params: lincore.Parameters) {
-            this.printer = new HtmlPrinter(params.getInt("width"));
-            this.params = params;
+        constructor() {
+            this.printer = new HtmlPrinter(settings.params.getInt("width"));
             this.tabControl = new lincore.TabControl("li.tab",
                 "div#tab_contents div.content", undefined);
         }
@@ -36,11 +34,7 @@ module cryptogame {
             this.winDlgElem = $("#win_dlg");
             this.charPickerDlg = $("char_picker");
             this.charPickerSubst = $("#char_picker_subst");
-            
             $("#footer").removeClass("hidden");
-            var expandables = $(".expandable");
-            expandables.slideToggle(0);
-            lincore.makeAllExpandable(expandables);
             this.tabControl.init(undefined, "mouseenter");
             var self = this;
             var deselect = $("li#deselect_tab");
@@ -57,25 +51,11 @@ module cryptogame {
             var tabContents = $("div#tab_contents");
             var footer = $("div#footer");
             $("div#tabcontrol").mouseleave((e) => { self.tabControl.deselect() });
-            //this.tabControl.onTabSelectCallback = (tab, content) => {
-            //    var tabOffset = tab.offset();
-            //    var tabWidth = tab.width();
-            //    var documentWidth = $(document).width();
-            //    var halign = (tabOffset.left + tabWidth / 2) / documentWidth;
-            //    var tabContentsOffset = { top: tabOffset.top - tab.height(), left: 0 };
-            //    console.log(halign);
-            //    if (halign < 0.334) {
-            //        tabContentsOffset.left = tabOffset.left;
-            //    } else if (halign >= 0.667) {
-            //        tabContentsOffset.left = tabOffset.left + tabWidth - tabContents.width();
-            //    } else {
-            //        tabContentsOffset.left = tabOffset.left + (tabWidth - tabContents.width()) / 2;
-            //    }
-            //    tabContents.offset(tabContentsOffset);
-            //    console.log(`tabOffset=${lincore.dumpObject(tabOffset) } tabContentsOffset=${lincore.dumpObject(tabContentsOffset)}`);
-            //};
         }
 
+        populateDifficultySettings(difficulties: {}, elem: JQuery, callback: (difficulty: {}) => void) {
+            
+        }
         
         
         setMark(m: boolean[], cipher: SimpleCipher, translation: Dict<string>) {
@@ -110,7 +90,7 @@ module cryptogame {
             this.timePassed = 0;
             this.timerHandle = setInterval(this.getTimerFunc(), 1000);
             this.winDlgElem.addClass("hidden");
-            var p = new lincore.Parameters(<Dict<string>>lincore.flatcopy(this.params.dict));
+            var p = new lincore.Parameters(<Dict<string>>lincore.flatcopy(settings.params.dict));
             p.dict["seed"] = "" + seed;
             var url = lincore.getUrlPart(window.location.href);
             this.msgIdElem.html(

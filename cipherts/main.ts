@@ -1,4 +1,5 @@
 ﻿///<reference path="jquery.d.ts" />
+///<require path="definitions.ts" />
 ///<reference path="game_logic.ts" />
 ///<reference path="game_view.ts" />
 ///<reference path="util/keys.ts" />
@@ -10,34 +11,33 @@ $(() => {
     game.play();
 })
 
-module cryptogame {
+module cryptogame {    
+
     export class GameController {
         logic: GameLogic;
         view: GameView;
         pickerDlg: SubstitutionPickerDlg;
-        params: lincore.Parameters;
         datasets: Dict<GameDatabase> = {
             "covert_action": covertActionData,
             "default": covertActionData
         };
-        difficulties = [
-            {},
-            { stripPunctuation: true },
-            { stripWhitespace: true },
-            { stripPunctuation: true, stripWhitespace: true }
-        ];
+        data: GameDatabase;
 
         ngramInput: JQuery;
         ngramClear: JQuery;
         ngramFilter: string;
         enteredSubst: string;
+        settingsPanel: ui.SettingsPanel;
 
         constructor() {
-            this.params = new lincore.Parameters(document.location.search);
-            this.logic = new GameLogic(this.params, this.datasets, this.difficulties);
-            this.view = new GameView(this.params);
+            settings.init(document.location.search);
+            var dbstr = settings.params.get("db", "default");
+            this.data = this.datasets[dbstr];
+            this.logic = new GameLogic();
+            this.view = new GameView();
             this.ngramFilter = "";
             this.pickerDlg = new SubstitutionPickerDlg();
+            this.settingsPanel = new ui.SettingsPanel();
         }
 
         init() {
@@ -49,7 +49,7 @@ module cryptogame {
         }
 
         win() {
-            this.params.remove("seed");
+            settings.params.remove("seed");
             var transl: Dict<string> = <Dict<string>>lincore.getInvertedKvs(this.logic.cipher.dictionary);
             this.view.print(this.logic.cipher, transl);
             this.view.showWinState();
@@ -130,11 +130,22 @@ module cryptogame {
 
         play() {
             var seed = this.logic.random.seed;
-            this.logic.newGame();
+            this.logic.newGame(this.data);
             var cipher = this.logic.cipher;
             var msgLength = cipher.cipher.length;
             this.view.newGame(seed, msgLength, cipher.alphabet.letters);
             this.view.print(cipher, this.logic.translation);
+            var self = this;
+            this.settingsPanel.print(this.logic.db, $("div#game_settings"),
+                (k, v) => {
+                    if (k === "new game") {
+                        self.play();
+                    } else {
+                        settings.params.set(k, v);
+                        settings.saveToLocalStorage();
+                    }
+                }
+            );
             var self = this;
             this.pickerDlg.populate(cipher.alphabet.letters, (subst, transl) => {
                 self.pickerDlg.hide();
