@@ -324,12 +324,12 @@ covertActionData.difficulties = [
         options: { stripPunctuation: true, stripWhitespace: true }
     }, {
         name: "Very challenging",
-        desc: "whitespace, punctuation, single character letters and most common digrams",
+        desc: "whitespace, punctuation, single character letters and most common digrams (multi-character letters can not be typed with keyboard atm, use the mouse instead)",
         id: 4,
         options: { alphabet: "en_latin_bigrams" }
     }, {
         name: "Barely possible",
-        desc: "no whitespace, no punctuation, single character letters and most common digrams",
+        desc: "no whitespace, no punctuation, single character letters and most common digrams (multi-character letters can not be typed with keyboard atm, use the mouse instead)",
         id: 5,
         options: {
             alphabet: "en_latin_bigrams",
@@ -999,7 +999,7 @@ var cryptogame;
         GameLogic.prototype.createCipher = function () {
             var diff = cryptogame.settings.params.getInt("difficulty", 0);
             this.difficulty = this.db.difficulties[diff];
-            var alphabetName = cryptogame.settings.params.get("alphabet", this.difficulty["alphabet"] || "default");
+            var alphabetName = this.difficulty.options["alphabet"] || "default";
             this.alphabet = this.db.alphabets[alphabetName];
             this.cipher = new cryptogame.SimpleCipher(this.alphabet, this.difficulty.options);
             this.cipher.encode(this.message);
@@ -1022,11 +1022,20 @@ var cryptogame;
         }
         settings.init = init;
         function loadLocalStorage() {
+            if (!window.localStorage) {
+                console.log("local storage not available, can not load.");
+                settings.params = new lincore.Parameters();
+                return;
+            }
             var json = window.localStorage.getItem("settings");
             settings.params = lincore.Parameters.fromJson(json);
         }
         settings.loadLocalStorage = loadLocalStorage;
         function saveToLocalStorage() {
+            if (!window.localStorage) {
+                console.log("local storage not available, can not load.");
+                return;
+            }
             var clone = settings.params.clone("seed");
             window.localStorage.setItem("settings", clone.toJson());
         }
